@@ -1,0 +1,10 @@
+Convex optimization library: https://www.cvxpy.org/index.html
+Portfolio Optimization Guide: https://www.cvxpy.org/examples/index.html
+Guide on portfolio weight matrix calc: https://blog.quantinsti.com/calculating-covariance-matrix-portfolio-variance/
+Example of portfolio optimization models: https://blog.quantinsti.com/portfolio-optimization-methods/
+
+-- Main math models found:
+
+	1. Markowitz model (minimazion of variance with some contraints) (mean-variance optimization, find weights to get as close as possible
+						to the expected returns given a certain level of risk)
+	2. Black-Litterman model (do not need to know the expected result)
