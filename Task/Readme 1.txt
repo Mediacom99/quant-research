@@ -28,3 +28,5 @@ COSE UTILI:
 
 1. install module: python3.10.exe -m pip install <module_name>
 https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.pdf
+2. huge machine learning library: https://scikit-learn.org/stable/
+3. or this one is good: https://www.statsmodels.org/stable/index.html
