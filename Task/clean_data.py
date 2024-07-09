@@ -1,47 +1,53 @@
 # This module takes raw data (from excel file) and formats it correctly in order to use it for further statistical purposes.
 
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.linear_model  import LinearRegression
 
 
 data = pd.read_excel("data.xlsx", sheet_name=[0,1,2,3,4,5])
 returns = data[0];
+fund = data[5];
 
-# Set timestamps as dataframe index (year-month-day)
-returns = returns.set_index('Date')
+fund.set_index('Dates', inplace=True)
 
-# Define the number of days before and after for calculating mean
-days_before = 5
-days_after = 5
+fund_daily = fund.resample('D').interpolate()
 
-## Change dataframe so that each zero gets replaced by the mean of the previous and next 5 days
-
-for cols in returns.columns:
-
-    series = returns[cols]
-    # Find indices of zeros
-    indices_to_change = series.index[series == 0]
-
-    print("Zeroes:", indices_to_change.size)
+## Remove weekends and CHECK WHAT INTERPOLATE DOES, ARE THERE NULL VALUES ?
 
 
-    # Loop through indices of zeros to change
-    for idx in indices_to_change:
+def mean_clean(returns):
+    # Set timestamps as dataframe index (year-month-day)
+    returns = returns.set_index('Date')
 
-        # Find date of 5 days before and after this particular zero date
-        start_date = idx - pd.DateOffset(days=days_before)
-        end_date = idx + pd.DateOffset(days=days_after)
+    # Define the number of days before and after for calculating mean
+    days_before = 5
+    days_after = 5
 
-        # Extract values from timeframe
-        data_range = series.loc[start_date:end_date]
+    ## Change dataframe so that each zero gets replaced by the mean of the previous and next 5 days
 
-        # Calculate mean 
-        mean_return = data_range.mean()
+    for cols in returns.columns:
 
-        # Update the Series with the predicted value for zeros
-        series.loc[idx] = mean_return
+        series = returns[cols]
+        # Find indices of zeros
+        indices_to_change = series.index[series == 0]
+
+        print("Zeroes:", indices_to_change.size)
 
 
-returns.to_excel('RendimentiFormat.xlsx')
+        # Loop through indices of zeros to change
+        for idx in indices_to_change:
+
+            # Find date of 5 days before and after this particular zero date
+            start_date = idx - pd.DateOffset(days=days_before)
+            end_date = idx + pd.DateOffset(days=days_after)
+
+            # Extract values from timeframe
+            data_range = series.loc[start_date:end_date]
+
+            # Calculate mean and update series
+            series.loc[idx] = data_range.mean()
+
+
+    returns.to_excel('RendimentiFormat.xlsx')
+    return
+
+
