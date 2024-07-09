@@ -3,16 +3,6 @@
 import pandas as pd
 
 
-data = pd.read_excel("data.xlsx", sheet_name=[0,1,2,3,4,5])
-returns = data[0];
-fund = data[5];
-
-fund.set_index('Dates', inplace=True)
-
-fund_daily = fund.resample('D').interpolate()
-
-## Remove weekends and CHECK WHAT INTERPOLATE DOES, ARE THERE NULL VALUES ?
-
 
 def mean_clean(returns):
     # Set timestamps as dataframe index (year-month-day)
@@ -30,7 +20,7 @@ def mean_clean(returns):
         # Find indices of zeros
         indices_to_change = series.index[series == 0]
 
-        print("Zeroes:", indices_to_change.size)
+        print("Number of zeroes:", indices_to_change.size)
 
 
         # Loop through indices of zeros to change
@@ -46,8 +36,26 @@ def mean_clean(returns):
             # Calculate mean and update series
             series.loc[idx] = data_range.mean()
 
+    return returns
 
+
+def main():
+    data = pd.read_excel("data.xlsx", sheet_name=[0,1,2,3,4,5])
+    returns = data[0];
+    fund = data[5];
+
+    fund.set_index('Dates', inplace=True)
+
+    fund_daily = fund.resample('D').interpolate()
+
+    #print(fund_daily.describe())
+
+    returns = mean_clean(returns)
     returns.to_excel('RendimentiFormat.xlsx')
+    print(returns.describe())
+    ## Remove weekends and CHECK WHAT INTERPOLATE DOES, ARE THERE NULL VALUES ?
     return
 
+
+main()
 
