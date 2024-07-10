@@ -1,62 +1,119 @@
 # This module takes raw data (from excel file) and formats it correctly in order to use it for further statistical purposes.
 # This module should be used once to clean the raw data, it will output an execl file containing all the cleaned data,
-# properly formatted
+# properly formatted into daily data.
 
 import pandas as pd
-import eda #custom exploratory data anlysis module
-
-def mean_clean(returns):
-
-    # Define the number of days before and after for calculating mean
-    days_before = 5
-    days_after = 5
-
-    ## Change dataframe so that each zero gets replaced by the mean of the previous and next 5 days
-
-    for cols in returns.columns:
-
-        series = returns[cols]
-        # Find indices of zeros
-        indices_to_change = series.index[series == 0]
-
-        print("Number of zeroes:", indices_to_change.size)
 
 
+## Takes a date indexed dataframe as input, finds all dates corresponding to either zeros or null values and it replaces them with a moving-average of period 5 days
+## period is the number of days (both before and after) to use for the moving-average. Standard is 5 days before and after. Timetp specifies the timestep to use
+## when calculating time offset for moving average, for example timetp='months' would calculate moving average every 'period' months.
+def mean_clean(returns, period = 5, timetp='days'):
+
+    # Loop over series of dataframe
+    for cols_name, series in returns.items():
+
+        # Find indices of zeros and null values
+        indices_to_change = series[series == 0].index
+        null_values = series[series.isnull()].index
+
+        print(cols_name)
+        print("Zeroes: ", indices_to_change.size)
+        print("NaN: ", null_values.size)
+
+        #timedelta = pd.Timedelta(period, timetp)
+
+        if timetp == 'days':
+            timeoffset = pd.DateOffset(days = period)            
+        if timetp == 'months':
+            timeoffset = pd.DateOffset(months = period)
+                
+        
+        
         # Loop through indices of zeros to change
         for idx in indices_to_change:
 
-            # Find date of 5 days before and after this particular zero date
-            start_date = idx - pd.DateOffset(days=days_before)
-            end_date = idx + pd.DateOffset(days=days_after)
-
+            # Find date of 'period' days before and after this particular zero date
+            start_date = idx - timeoffset;
+            end_date = idx + timeoffset;
             # Extract values from timeframe
             data_range = series.loc[start_date:end_date]
-
             # Calculate mean and update series
             series.loc[idx] = data_range.mean()
+
+        for ndx in null_values:
+            start_date = ndx - timeoffset;
+            end_date = ndx + timeoffset;
+            data_range = series.loc[start_date:end_date]
+            if data_range.isnull().all():
+                print('For column \'{}\' use a bigger period, the moving-average is full of NaN values!'.format(cols_name))
+                print("Start date: ", start_date)
+                print("End date: ", end_date)
+                print("Stopping replacing NaN values!")
+                break;
+            series.loc[ndx] = data_range.mean()
+
+        print("")
 
     return returns
 
 
 
-
-#TODO fundamentals: Remove weekends and CHECK WHAT INTERPOLATE DOES, ARE THERE NULL VALUES ?
-#TODO Also check higher moments between our data and normal pdf 
 def main():
-    data = pd.read_excel("data.xlsx", sheet_name=[0,1,2,3,4,5])
-    returns = data[0];
-    fund = data[5];
+    # Xls is the excel file with different sheets, each one will become a certain dataframe
+    xls = pd.ExcelFile("data.xlsx")
+    sheet_names = xls.sheet_names
+    data = {}
+    
+    for sheet_name in sheet_names:
+        data[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
 
-    #Set date column as index
-    returns = returns.set_index('Date')
-    fund = fund.set_index('Dates')
+    #Now 'data' is a dictionary containing all sheets, the keys are the sheet names in the
+    #excel file
+        
+    #For each dataframe in data
+    for df in data:
+        data[df]['Date'] = pd.to_datetime(data[df]['Date']) #Format Date to datetime format
+        data[df].set_index('Date', inplace=True) #Set Date column as index
 
-    fund_daily = fund.resample('D').interpolate()
+    #Divide each sheet into its own dataframe
+    returns =   data['Rendimenti Indici Azionari'] 
+    rates   =   data['Tassi'] 
+    macro   =   data['Macroeconomics'] 
+    forex   =   data['Forex'] 
+    commod  =   data['Commodities'] 
+    fund    =   data['Fondamentali Indici Azionari'] 
+    
 
-    #print(fund_daily.describe())
+    ## DATA CLEANING
 
+    # Mean clean zeros and null values in data
     returns = mean_clean(returns)
-    returns.to_excel('RendimentiFormat.xlsx')
+    rates = mean_clean(rates)
+    forex = mean_clean(forex)
+    commod = mean_clean(commod)
+
+    # Date range to reindex monthly and quarterly data into daily data
+    business_days = pd.date_range(start=returns.index.min(), end=returns.index.max(), freq='B')
+
+    # Clean data and reindex into daily data by copying monthly or quarterly value for each day
+    macro = mean_clean(macro, 17, 'months')
+    macro_daily =  macro.reindex(business_days, method='ffill')
+
+    fund = mean_clean(fund, 3, 'months') #you can change 6 with any multiple of 3 (data is quarterly)
+    fund_daily = fund.reindex(business_days, method='ffill')
+
+    ## OUTPUT XLSX FILES
+
+    #Print each cleaned dataframe into its own excel file
+    returns.to_excel('FormattedData/ReturnsFormat.xlsx')
+    rates.to_excel('FormattedData/RatesFormat.xlsx')
+    forex.to_excel('FormattedData/ForexFormat.xlsx')
+    commod.to_excel('FormattedData/CommoditiesFormat.xlsx')
+    
+    macro_daily.to_excel('FormattedData/MacroFormat.xlsx')
+    fund_daily.to_excel('FormattedData/FundamentalsFormat.xlsx')
+
     
     return
 

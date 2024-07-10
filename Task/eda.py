@@ -7,10 +7,11 @@ from sklearn.discriminant_analysis import StandardScaler
 from scipy.stats import ttest_rel, norm
 from scipy.optimize import curve_fit
 
-
+#Gauss pdf functionS
 def gaussian(x, mu, sigma, amplitude):
     return amplitude * np.exp(-((x - mu) ** 2 / (2 * sigma ** 2)))
 
+#TODO Also check higher moments between our data and normal pdf 
 # Take a pandas series as input, scale data, fit it with normalized gaussian, calculate p-value and other statistical 
 # indices to determine the goodness of the fit, lastly plot the gaussian and the data on an histogram.
 def gaussian_fitting(series):
