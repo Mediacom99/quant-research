@@ -48,6 +48,7 @@ def gaussian_fitting(series):
     p = norm.pdf(x, mu, sigma)
     plt.plot(x, p, 'k',linewidth=2)
     plt.tight_layout()
-    plt.show() 
+    plt.show()
+    #plt.savefig("./graphs/graph.png");
 
     return
