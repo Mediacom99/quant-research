@@ -16,9 +16,7 @@ def gaussian(x, mu, sigma, amplitude):
 # indices to determine the goodness of the fit, lastly plot the gaussian and the data on an histogram.
 def gaussian_fitting(series):
     # Scale the data to have mean 0 and std 1
-    scaler = StandardScaler()
-    scaled_data = pd.Series(scaler.fit_transform(series.values.reshape(-1,1)).flatten())
-   
+    scaled_data = pd.Series(StandardScaler().fit_transform(series.values.reshape(-1,1)).flatten())
 
     ## CURVE FIT
     hist, bin_edges = np.histogram(scaled_data, bins=round(np.sqrt(scaled_data.size)), density=True)

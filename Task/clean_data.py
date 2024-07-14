@@ -1,10 +1,12 @@
 # This module takes raw data (from excel file) and formats it correctly in order to use it for further statistical purposes.
 # This module should be used once to clean the raw data, it will output an execl file containing all the cleaned data,
 # properly formatted into daily data.
+# The data is cleaned by replacing every 0 (zero) and NaN with a moving average at their original timeframe,
+# after that everything is reindexed into a daily timeframe.
 
 import pandas as pd
 
-
+#TODO There is definitely a better way to do this.
 ## Takes a date indexed dataframe as input, finds all dates corresponding to either zeros or null values and it replaces them with a moving-average of period 5 days
 ## period is the number of days (both before and after) to use for the moving-average. Standard is 5 days before and after. Timetp specifies the timestep to use
 ## when calculating time offset for moving average, for example timetp='months' would calculate moving average every 'period' months.
@@ -45,7 +47,7 @@ def mean_clean(returns, period = 5, timetp='days'):
             start_date = ndx - timeoffset;
             end_date = ndx + timeoffset;
             data_range = series.loc[start_date:end_date]
-            if data_range.isnull().all():
+            if data_range.isnull().all(): # This is so that there are not more NaN values than the period of the mov average
                 print('For column \'{}\' use a bigger period, the moving-average is full of NaN values!'.format(cols_name))
                 print("Start date: ", start_date)
                 print("End date: ", end_date)
@@ -57,9 +59,7 @@ def mean_clean(returns, period = 5, timetp='days'):
 
     return returns
 
-
-
-def main():
+def clean():
     # Xls is the excel file with different sheets, each one will become a certain dataframe
     xls = pd.ExcelFile("data.xlsx")
     sheet_names = xls.sheet_names
@@ -67,11 +67,7 @@ def main():
     
     for sheet_name in sheet_names:
         data[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
-
-    #Now 'data' is a dictionary containing all sheets, the keys are the sheet names in the
-    #excel file
         
-    #For each dataframe in data
     for df in data:
         data[df]['Date'] = pd.to_datetime(data[df]['Date']) #Format Date to datetime format
         data[df].set_index('Date', inplace=True) #Set Date column as index
@@ -82,41 +78,37 @@ def main():
     macro   =   data['Macroeconomics'] 
     forex   =   data['Forex'] 
     commod  =   data['Commodities'] 
-    fund    =   data['Fondamentali Indici Azionari'] 
+    fund    =   data['Fondamentali Indici Azionari']
     
 
     ## DATA CLEANING
-
-    # Mean clean zeros and null values in data
+    print("INFO: starting cleaning dataframes...")
     returns = mean_clean(returns)
     rates = mean_clean(rates)
+    macro = mean_clean(macro, 17, 'months')
     forex = mean_clean(forex)
     commod = mean_clean(commod)
+    fund = mean_clean(fund, 3, 'months') #you can change 6 with any multiple of 3 (data is quarterly)    
 
+    print("INFO: starting reindexing into daily timeframe...")
     # Date range to reindex monthly and quarterly data into daily data
     business_days = pd.date_range(start=returns.index.min(), end=returns.index.max(), freq='B')
+    macro_daily =  macro.reindex(business_days, method='pad')
+    fund_daily = fund.reindex(business_days, method='pad')
 
-    # Clean data and reindex into daily data by copying monthly or quarterly value for each day
-    macro = mean_clean(macro, 17, 'months')
-    macro_daily =  macro.reindex(business_days, method='ffill')
-
-    fund = mean_clean(fund, 3, 'months') #you can change 6 with any multiple of 3 (data is quarterly)
-    fund_daily = fund.reindex(business_days, method='ffill')
-
-    ## OUTPUT XLSX FILES
-
+    print("INFO: writing xlsx files...")
     #Print each cleaned dataframe into its own excel file
     returns.to_excel('FormattedData/ReturnsFormat.xlsx')
     rates.to_excel('FormattedData/RatesFormat.xlsx')
     forex.to_excel('FormattedData/ForexFormat.xlsx')
     commod.to_excel('FormattedData/CommoditiesFormat.xlsx')
-    
-    macro_daily.to_excel('FormattedData/MacroFormat.xlsx')
+    macro_daily.to_excel('FormattedData/MacroFormat.xlsx')        
     fund_daily.to_excel('FormattedData/FundamentalsFormat.xlsx')
 
     
     return
 
 
-main()
+
+clean()
 
