@@ -6,7 +6,7 @@
 
 import pandas as pd
 import eda
-
+import utils 
 
 
 #TODO There is definitely a better way to do this.
@@ -62,19 +62,9 @@ def mean_clean(returns, period = 5, timetp='days'):
 
     return returns
 
-def clean():
+def clean_data_run():
     # Xls is the excel file with different sheets, each one will become a certain dataframe
-    xls = pd.ExcelFile("./data/data.xlsx")
-    sheet_names = xls.sheet_names
-    data = {}
-    
-    for sheet_name in sheet_names:
-        data[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
-        
-    for df in data:
-        data[df]['Date'] = pd.to_datetime(data[df]['Date']) #Format Date to datetime format
-        data[df].set_index('Date', inplace=True) #Set Date column as index
-
+    data = utils.get_data_from_excel('./data/data.xlsx')
     #Divide each sheet into its own dataframe
     returns =   data['Rendimenti Indici Azionari'] 
     rates   =   data['Tassi'] 
@@ -92,6 +82,7 @@ def clean():
     forex = mean_clean(forex)
     commod = mean_clean(commod)
     fund = mean_clean(fund, 3, 'months') #you can change 6 with any multiple of 3 (data is quarterly)    
+    
 
     print("INFO: starting reindexing into daily timeframe...")
     # Date range to reindex monthly and quarterly data into daily data
@@ -99,20 +90,22 @@ def clean():
     macro_daily =  macro.reindex(business_days, method='pad')
     fund_daily = fund.reindex(business_days, method='pad')
 
-    print("INFO: writing xlsx files...")
+
+    print("INFO: writing xlsx file...")
     #Print each cleaned dataframe into its own excel file
-    returns.to_excel('FormattedData/ReturnsFormat.xlsx')
-    rates.to_excel('FormattedData/RatesFormat.xlsx')
-    forex.to_excel('FormattedData/ForexFormat.xlsx')
-    commod.to_excel('FormattedData/CommoditiesFormat.xlsx')
-    macro_daily.to_excel('FormattedData/MacroFormat.xlsx')        
-    fund_daily.to_excel('FormattedData/FundamentalsFormat.xlsx')
+    with pd.ExcelWriter('./FormattedData/formatted-data.xlsx') as writer:
+        returns.to_excel(writer, sheet_name='Stock returns')
+        rates.to_excel(writer, sheet_name='Rates returns')
+        forex.to_excel(writer, sheet_name='Forex returns')
+        commod.to_excel(writer, sheet_name='Commodities returns')
+        macro_daily.to_excel(writer, sheet_name='Macro indices')        
+        fund_daily.to_excel(writer, sheet_name='Fundamentals')
 
     return
 
 
 
-clean()
+clean_data_run()
 print("Dataset cleaning finished successfully!")
 print("")
 

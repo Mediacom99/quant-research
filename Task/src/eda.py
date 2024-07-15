@@ -7,6 +7,8 @@ from sklearn.discriminant_analysis import StandardScaler
 from scipy.stats import ttest_rel, norm
 from scipy.optimize import curve_fit
 
+import utils
+
 #Gauss pdf functionS
 def gaussian(x, mu, sigma, amplitude):
     return amplitude * np.exp(-((x - mu) ** 2 / (2 * sigma ** 2)))
@@ -52,3 +54,23 @@ def gaussian_fitting(series):
     #plt.savefig("./graphs/graph.png");
 
     return
+
+
+def  eda_run():
+
+    data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
+
+    returns =   data['Stock returns'] 
+    rates   =   data['Rates returns'] 
+    macro   =   data['Macro indices'] 
+    forex   =   data['Forex returns'] 
+    commod  =   data['Commodities returns'] 
+    fund    =   data['Fundamentals']
+
+    gaussian_fitting(returns['Indice Azionario Paese 1'])
+
+    return
+
+
+
+eda_run()
