@@ -1,13 +1,33 @@
-from numpy import number
-import pandas as pd
-import matplotlib.pyplot as plt
+"""
 
+This module deals with training the model and forecasting returns based on factors
+using PCA+APT+LinearRegression or with the training of a LSTM Neural Network + LRP
 
-# Read excel file into a dictionary of pandas dataframes
-data = pd.read_excel("data.xlsx", sheet_name=[0,1,2,3,4,5])
-rendita_azioni = data[3] #Selecting each dataframe, corresponding to eaech sheet in the excel file
-print(rendita_azioni.head(3))
-print(" ")
-anums = rendita_azioni.iloc[0:20,1:3]
+"""
 
-print(anums.value_counts(normalize=True))
+import utils
+
+def model_train():
+    
+    data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
+    
+    #Normalizing data to have zero mean and unit variance 
+    #TODO I could also normalize first stocks and then normalize the rest with respect to stock    
+    for df in data:
+        data[df] = utils.normalize_dataframe(data[df])
+    
+    
+    # Divide dataset into training and testing datasets
+    data_training = {}
+    data_testing = {}
+    for df in data:
+        data_training[df], data_testing[df] = utils.divide_dataframe_lastyear(data[df])
+        
+    #Now data_training and data_testing are collections just like data, one with training data 
+    # and the other with testing data
+    
+    #Perform PCA
+    #Perform Linear Regression
+    #Forecast returns into testing
+    
+    return

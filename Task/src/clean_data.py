@@ -5,91 +5,67 @@
 # after that everything is reindexed into a daily timeframe.
 
 import pandas as pd
-import eda
 import utils 
+import numpy as np
 
 
-#TODO There is definitely a better way to do this.
-## Takes a date indexed dataframe as input, finds all dates corresponding to either zeros or null values and it replaces them with a moving-average of period 5 days
-## period is the number of days (both before and after) to use for the moving-average. Standard is 5 days before and after. Timetp specifies the timestep to use
-## when calculating time offset for moving average, for example timetp='months' would calculate moving average every 'period' months.
-def mean_clean(returns, period = 5, timetp='days'):
-
-    # Loop over series of dataframe
-    for cols_name, series in returns.items():
-
-        # Find indices of zeros and null values
-        indices_to_change = series[series == 0].index
-        null_values = series[series.isnull()].index
-
-        print(cols_name)
-        print("Zeroes: ", indices_to_change.size)
-        print("NaN: ", null_values.size)
-
-        #timedelta = pd.Timedelta(period, timetp)
-
-        if timetp == 'days':
-            timeoffset = pd.DateOffset(days = period)            
-        if timetp == 'months':
-            timeoffset = pd.DateOffset(months = period)
+def fill_mean(data, window = '5D'):
+    """
+    Forward and backword filling of zeros and NaN values. Apply rolling average
+    only over the previously filled values.
+    
+    Parameters:
+    data : dataframe to clean
+    window : time window to use for rolling average, default is 10 days (check pandas offset aliases)
+    
+    Output: cleaned dataframe as a new dataframe
+    This function does not change the passed dataframe 
+    """
+    
+    #Replace zeroes with NaN
+    df = data.copy()
+    df = df.replace(to_replace = 0, value = np.nan)
+    for cols_name, series in df.items():
+        # Mask to keep record of position of NaN values
+        nan_mask = series.isna()
+        series = series.ffill()
+        series = series.bfill()
+        #Apply moving average to filled values
+        df.loc[nan_mask, cols_name] = series.rolling(window = window).mean()
                 
-        
-        
-        # Loop through indices of zeros to change
-        for idx in indices_to_change:
-
-            # Find date of 'period' days before and after this particular zero date
-            start_date = idx - timeoffset;
-            end_date = idx + timeoffset;
-            # Extract values from timeframe
-            data_range = series.loc[start_date:end_date]
-            # Calculate mean and update series
-            series.loc[idx] = data_range.mean()
-
-        for ndx in null_values:
-            start_date = ndx - timeoffset;
-            end_date = ndx + timeoffset;
-            data_range = series.loc[start_date:end_date]
-            if data_range.isnull().all(): # This is so that there are not more NaN values than the period of the mov average
-                print('For column \'{}\' use a bigger period, the moving-average is full of NaN values!'.format(cols_name))
-                print("Start date: ", start_date)
-                print("End date: ", end_date)
-                print("Stopping replacing NaN values!")
-                break;
-            series.loc[ndx] = data_range.mean()
-
-        print("")
-
-    return returns
+    return df
 
 def clean_data_run():
     # Xls is the excel file with different sheets, each one will become a certain dataframe
     data = utils.get_data_from_excel('./data/data.xlsx')
+    
+    ## DATA CLEANING
+    print("INFO: cleaning dataframes...")
+    """ returns = fill_mean(returns)
+    rates = fill_mean(rates)
+    macro = fill_mean(macro)
+    forex = fill_mean(forex)
+    commod = fill_mean(commod)
+    fund = fill_mean(fund) """
+    for df in data:
+        data[df] = fill_mean(data[df]) 
+
+
+    # Change monthly and quarterly data into daily data using forward fill    
+    print("INFO: starting resampling into daily timeframe...") 
+    macro_daily = data['Macroeconomics'].resample('D').ffill()
+    fund_daily = data['Fondamentali Indici Azionari'].resample('D').ffill()
+    
+    #Check for nan values after cleaning
+    utils.count_nans(data)
+
+
     #Divide each sheet into its own dataframe
     returns =   data['Rendimenti Indici Azionari'] 
     rates   =   data['Tassi'] 
-    macro   =   data['Macroeconomics'] 
     forex   =   data['Forex'] 
-    commod  =   data['Commodities'] 
-    fund    =   data['Fondamentali Indici Azionari']
+    commod  =   data['Commodities']
     
-
-    ## DATA CLEANING
-    print("INFO: starting cleaning dataframes...")
-    returns = mean_clean(returns)
-    rates = mean_clean(rates)
-    macro = mean_clean(macro, 17, 'months')
-    forex = mean_clean(forex)
-    commod = mean_clean(commod)
-    fund = mean_clean(fund, 3, 'months') #you can change 6 with any multiple of 3 (data is quarterly)    
-    
-
-    print("INFO: starting reindexing into daily timeframe...")
-    # Date range to reindex monthly and quarterly data into daily data
-    business_days = pd.date_range(start=returns.index.min(), end=returns.index.max(), freq='B')
-    macro_daily =  macro.reindex(business_days, method='pad')
-    fund_daily = fund.reindex(business_days, method='pad')
-
 
     print("INFO: writing xlsx file...")
     #Print each cleaned dataframe into its own excel file
@@ -100,13 +76,7 @@ def clean_data_run():
         commod.to_excel(writer, sheet_name='Commodities returns')
         macro_daily.to_excel(writer, sheet_name='Macro indices')        
         fund_daily.to_excel(writer, sheet_name='Fundamentals')
-
+    
+    print("Dataset cleaning finished successfully!")
+    
     return
-
-
-
-clean_data_run()
-print("Dataset cleaning finished successfully!")
-print("")
-
-

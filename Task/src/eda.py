@@ -56,6 +56,9 @@ def gaussian_fitting(series):
     return
 
 
+#TODO calculate kurtosis and skewness
+#TODO plot variance over different time periods (each week, each month and each year)
+#TODO visualize stock returns monthly over the whole timeframe
 def  eda_run():
 
     data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
@@ -67,10 +70,6 @@ def  eda_run():
     commod  =   data['Commodities returns'] 
     fund    =   data['Fundamentals']
 
-    gaussian_fitting(returns['Indice Azionario Paese 1'])
+    gaussian_fitting(commod['Commodity 1'])
 
     return
-
-
-
-eda_run()
