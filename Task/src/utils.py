@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from numpy import abs
 
 #Reads sheets of excel file, set datetime format and 
 #date column as index. Returns collection of dataframes,
@@ -52,11 +53,12 @@ def normalize_dataframe(dataframe):
     scaler = StandardScaler()
     df = dataframe.copy()
     for cols_name, series in df.items():
-        df[cols_name] = pd.Series(scaler.fit_transform(series.array.reshape(-1,1)).flatten(), index=df.index);
+        df[cols_name] = pd.Series(scaler.fit_transform(series.values.reshape(-1,1)).flatten(), index=df.index);
     
     return df
 
-def divide_dataframe_lastyear(dataframe):
+#TODO Generalize date
+def divide_df_lastyear(df):
     """Divide dataframe into two dataframes, cutting the original one at a certain date
 
     Args:
@@ -65,6 +67,19 @@ def divide_dataframe_lastyear(dataframe):
     Returns:
         (pd.DataFrame, pd.DataFrame): returns a tuple like (training DataFrame, testing DataFrame) 
     """
-    training = dataframe[:'2018-12-31']
-    testing = dataframe['2019-01-01':]
+    training = df[:'2018-12-31']
+    testing = df['2019-01-01':]
     return (training, testing)
+
+#Clean cov matrix by replacing extremely small values with zeroes
+def clean_cov_matrix(df, threshold):
+    # Calculate the covariance matrix
+    cov_matrix = df.cov()
+    
+    # Create a mask for values smaller than the threshold
+    mask = abs(cov_matrix) < threshold
+    
+    # Replace values smaller than the threshold with 0
+    cov_matrix[mask] = 0
+    
+    return cov_matrix

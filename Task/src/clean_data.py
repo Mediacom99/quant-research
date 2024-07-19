@@ -4,6 +4,7 @@
 # The data is cleaned by replacing every 0 (zero) and NaN with a moving average at their original timeframe,
 # after that everything is reindexed into a daily timeframe.
 
+from matplotlib import pyplot as plt
 import pandas as pd
 import utils 
 import numpy as np
@@ -41,20 +42,14 @@ def clean_data_run():
     
     ## DATA CLEANING
     print("INFO: cleaning dataframes...")
-    """ returns = fill_mean(returns)
-    rates = fill_mean(rates)
-    macro = fill_mean(macro)
-    forex = fill_mean(forex)
-    commod = fill_mean(commod)
-    fund = fill_mean(fund) """
     for df in data:
         data[df] = fill_mean(data[df]) 
 
 
-    # Change monthly and quarterly data into daily data using forward fill    
+    # Resampling monthly and quarterly data into daily data using forward fill    
     print("INFO: starting resampling into daily timeframe...") 
-    macro_daily = data['Macroeconomics'].resample('D').ffill()
-    fund_daily = data['Fondamentali Indici Azionari'].resample('D').ffill()
+    macro_daily = data['Macroeconomics'].resample('B').ffill()
+    fund_daily = data['Fondamentali Indici Azionari'].resample('B').ffill()
     
     #Check for nan values after cleaning
     utils.count_nans(data)
@@ -68,7 +63,7 @@ def clean_data_run():
     
 
     print("INFO: writing xlsx file...")
-    #Print each cleaned dataframe into its own excel file
+    #Print each cleaned dataframe into its own sheet in the same excel file
     with pd.ExcelWriter('./FormattedData/formatted-data.xlsx') as writer:
         returns.to_excel(writer, sheet_name='Stock returns')
         rates.to_excel(writer, sheet_name='Rates returns')
@@ -78,5 +73,4 @@ def clean_data_run():
         fund_daily.to_excel(writer, sheet_name='Fundamentals')
     
     print("Dataset cleaning finished successfully!")
-    
     return

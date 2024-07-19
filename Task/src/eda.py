@@ -1,75 +1,82 @@
 # Exploratory Data Analysis of cleaned data
 
 import pandas as pd
-import matplotlib.pyplot as plt
+from scipy import stats as st
 import numpy as np
-from sklearn.discriminant_analysis import StandardScaler
-from scipy.stats import ttest_rel, norm
-from scipy.optimize import curve_fit
+from matplotlib import pyplot as plt
 
 import utils
 
-#Gauss pdf functionS
-def gaussian(x, mu, sigma, amplitude):
-    return amplitude * np.exp(-((x - mu) ** 2 / (2 * sigma ** 2)))
+# Fit series against normal distribution. Provide mean, variance, t-test and p-value. (over N simulations)
+def normal_fit_test(series: pd.Series):
+    
+    print("INFO: starting goodness of fit test")
+    data = series.values
+    
+    rng = np.random.default_rng()
+    #Using scipy.stats.goodness_of_fit
+    #known_params = {'loc' : data.mean(), 'scale' : data.std()}
+    result = st.goodness_of_fit(st.norm, data, statistic='ad', random_state=rng)
 
-#TODO Also check higher moments between our data and normal pdf 
-# Take a pandas series as input, scale data, fit it with normalized gaussian, calculate p-value and other statistical 
-# indices to determine the goodness of the fit, lastly plot the gaussian and the data on an histogram.
-def gaussian_fitting(series):
-    # Scale the data to have mean 0 and std 1
-    scaled_data = pd.Series(StandardScaler().fit_transform(series.values.reshape(-1,1)).flatten())
+    return result
 
-    ## CURVE FIT
-    hist, bin_edges = np.histogram(scaled_data, bins=round(np.sqrt(scaled_data.size)), density=True)
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+#TODO probably wrong, should check Mardia's test
+def multi_norm_fit_test(data: pd.DataFrame):
+    
+    mean = data.mean()
+    cov = data.cov()
+    N = len(mean)
+    
+    #Generate data with mean and cov of data
+    data = st.multivariate_normal.rvs(mean = mean, cov = cov)
+    
+    #Calculate Mahalanobis distances (multivariate distance like q-squared)
+    mahab_dist = np.sqrt( ((data - mean) @ np.linalg.inv(cov)) ** 2) # @ is matrix multiplication operator in numpy
+    
+    #Calculate p-value using fact that mahab_dist follows a chi-squared distribution
+    chi2_stat = np.sum(mahab_dist ** 2)
+    pvalue = 1 - st.chi2.cdf(chi2_stat, N)
+    #print(f"P-value of normal multivariate fitting: {pvalue}")
+    
+    return pvalue
 
-    params, cov = curve_fit(gaussian, bin_centers, hist, p0=[0, 1, 1])
+def shapiro_wilk_norm(data):
+    
+    #for cols_name, series in data.items():
+    #    res, pvalue = st.shapiro(series.values)
+    #    print(f"P-value of normal fit for {cols_name}: {pvalue}")
+    
+    res, p = st.shapiro(data['Indice Azionario Paese 1'].values)
+    return p
 
-    print(f"Mean: {params[0]}, Standard Deviation: {params[1]}, Amplitude: {params[2]}")
-    #print(cov)
-
-    mu = params[0]
-    sigma = params[1]
-     
-
-    ## TESTING FIT
-    fitted_samples = np.random.normal(loc=mu, scale=sigma, size=scaled_data.size)
-    t_statistic, p_value = ttest_rel(scaled_data, fitted_samples)
-
-    print(f"t-statistic: {t_statistic:.4f}")
-    print(f"P-value: {p_value*100:.2f}%") 
-    print(f"Cohen's d: ", mu/sigma)
-    print(f"Mean Squared Error: ", np.mean((fitted_samples - scaled_data)**2))
-
-
-    scaled_data.plot(kind='hist', bins = 500, density=True)
-    # Plot fitted Gaussian
-    xmin, xmax = plt.xlim()
-    x = np.linspace(xmin, xmax, 5000)
-    p = norm.pdf(x, mu, sigma)
-    plt.plot(x, p, 'k',linewidth=2)
-    plt.tight_layout()
-    plt.show()
-    #plt.savefig("./graphs/graph.png");
-
-    return
 
 
 #TODO calculate kurtosis and skewness
 #TODO plot variance over different time periods (each week, each month and each year)
 #TODO visualize stock returns monthly over the whole timeframe
+#TODO LAG_PLOT FOR RANDOMNESS OF TIME SERIES
 def  eda_run():
 
     data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
+    returns_norm = utils.normalize_dataframe(data['Stock returns'])
+    print(returns_norm.head())
 
-    returns =   data['Stock returns'] 
-    rates   =   data['Rates returns'] 
-    macro   =   data['Macro indices'] 
-    forex   =   data['Forex returns'] 
-    commod  =   data['Commodities returns'] 
-    fund    =   data['Fundamentals']
-
-    gaussian_fitting(commod['Commodity 1'])
-
+    """ 
+    for cols_name, series in returns_norm.items():
+        res = normal_fit_test(series)
+        print(cols_name, ":")
+        print(f"(p-value, statistic) -> ({res.pvalue},{res.statistic})")
+        print(f"Estimated params (loc, scale): {res.fit_result.params.loc}, {res.fit_result.params.scale}")
+        print("")
+     """
+     
+    
+    sum = 0
+    sum2 = 0
+    K = 10000
+    #for i in range(K):
+        #sum += multi_norm_fit_test(returns_norm)
+        #sum2 += shapiro_wilk_norm(returns_norm)
+    print(f"Average p-value multivariate distribution: {sum/K}")
+    print(f"Average p-value distribution: {sum2/K}")
     return

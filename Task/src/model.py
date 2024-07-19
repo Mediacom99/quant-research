@@ -1,11 +1,50 @@
 """
 
 This module deals with training the model and forecasting returns based on factors
-using PCA+APT+LinearRegression or with the training of a LSTM Neural Network + LRP
+using PCA on factors and a linear multi-factor model (Linear regression).
 
 """
 
 import utils
+from sklearn.decomposition import PCA
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+
+#Calculate PCA over given dataframe, returing the transformed data
+#It keeps enough PC to reach a certain variance passed as parameter (between 0 and 1)
+def pca_transform_wrapper(factors:pd.DataFrame, desired_var:float = 0.8, print_loadings:bool = False):
+    
+    pca = PCA()
+    feature_names = factors.columns
+    pca.fit_transform(factors)
+    cumulative_variance_ratio = np.cumsum(pca.explained_variance_ratio_) #Cumulative sum of variance ratios
+    
+    
+    #Choose number of components
+    n_components = np.argmax(cumulative_variance_ratio >= desired_var) + 1
+    print(f"Number of components explaining {desired_var*100}% of variance: {n_components}")
+    
+    pca = PCA(n_components=n_components)
+    factor_training = pca.fit_transform(factors) #New factor_training dataset after PCA
+    
+    #This dataframe, if made up of all the PC, is the inverse (or transpose since orthogonal) of the change of basis matrix
+    #between the original space and the space where the covariance matrix between factors is diagonal. Basically you can see
+    # how much each factors contributes to each PC.
+    loadings = pd.DataFrame(
+    pca.components_.T,
+    columns=[f'PC{i}' for i in range(n_components)],
+    index=feature_names
+    )
+    if(print_loadings):
+        print("Loadings:")
+        print(loadings)
+    
+    factor_df = pd.DataFrame(factor_training, columns=[f'PC{i}' for i in range(n_components)], index=factors.index)
+    
+    return factor_df    
+
+
 
 def model_train():
     
@@ -18,16 +57,26 @@ def model_train():
     
     
     # Divide dataset into training and testing datasets
-    data_training = {}
-    data_testing = {}
+    factor_training = {}
+    factor_testing = {}
+    returns_training, returns_testing = utils.divide_df_lastyear(data['Stock returns'])
     for df in data:
-        data_training[df], data_testing[df] = utils.divide_dataframe_lastyear(data[df])
-        
-    #Now data_training and data_testing are collections just like data, one with training data 
-    # and the other with testing data
+        if(df != 'Stock returns'):
+            factor_training[df], factor_testing[df] = utils.divide_df_lastyear(data[df])
+            
+    pca_factors = pd.concat(factor_training, axis=1) #Merge all factors into one bing dataframe        
     
     #Perform PCA
     #Perform Linear Regression
     #Forecast returns into testing
+    print("Factors covariance matrix before PCA:")
+    print(pca_factors.cov())
+    
+    trans = pca_transform_wrapper(factors=pca_factors, desired_var=1)
+    
+    print("Factors covariance matrix after PCA:")
+    print(utils.clean_cov_matrix(trans, 0.00001))
+        
+
     
     return
