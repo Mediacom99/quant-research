@@ -1,6 +1,9 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from numpy import abs
+from matplotlib import pyplot as plt
+import numpy as np
+from scipy import stats
 
 #Reads sheets of excel file, set datetime format and 
 #date column as index. Returns collection of dataframes,
@@ -83,3 +86,47 @@ def clean_cov_matrix(df, threshold):
     cov_matrix[mask] = 0
     
     return cov_matrix
+
+
+#Plot results of normality tests for 5 stocks in a single image
+def five_fig_plot(df:pd.DataFrame):
+    
+    # Set up the plot
+    fig, axs = plt.subplots(2, 3, figsize=(15, 10))
+    axs = axs.ravel()  # Flatten the 2D array of axes for easier indexing
+
+    # Colors for each stock
+    colors = ['blue', 'green', 'red', 'purple', 'orange']
+
+        # Plot for each stock
+    for i, column in enumerate(df.columns):
+        data = df[column]
+        
+        # Fit a normal distribution to the data
+        mu, std = stats.norm.fit(data)
+        print(mu,std)
+        
+        # Plot the histogram
+        axs[i].hist(data, bins=50, density=True, alpha=0.7, color=colors[i])
+        
+        # Plot the PDF
+        xmin, xmax = axs[i].get_xlim()
+        x = np.linspace(xmin, xmax, 100)
+        p = stats.norm.pdf(x, mu, std)
+        axs[i].plot(x, p, 'k', linewidth=2)
+        
+        axs[i].set_title(f'{column} Returns')
+        axs[i].set_xlabel('Returns')
+        axs[i].set_ylabel('Density')
+
+    # Plot all stocks together
+    axs[5].set_title('All Stocks')
+    axs[5].set_xlabel('Returns')
+    axs[5].set_ylabel('Density')
+
+    # Remove the unused subplot
+    fig.delaxes(axs[5])
+
+    plt.tight_layout()
+    plt.show()
+    return

@@ -11,9 +11,9 @@ import pandas as pd
 pd.options.mode.copy_on_write = True
 
 # Clean data (this module cleans raw data)
-#clean_data.clean_data_run()
+clean_data.clean_data_run()
 
-#eda.eda_run()
+eda.eda_run()
 
 #Model training and weights calculation
 model.model_train()
