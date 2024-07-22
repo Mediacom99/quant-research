@@ -4,6 +4,7 @@ import pandas as pd
 from scipy import stats as st
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 import utils
 
@@ -22,7 +23,7 @@ def normal_fit_test(series: pd.Series, statistic:str):
     return result
 
 
-def plot_weekly_variance(df:pd.DataFrame):
+def plot_weekly_std(df:pd.DataFrame):
     # Calculate weekly variance
     weekly_var = df.resample('W').std()
     
@@ -42,6 +43,46 @@ def plot_weekly_variance(df:pd.DataFrame):
     plt.tight_layout()
     plt.show()
     return
+
+def correlation_analysis(df:pd.DataFrame):
+    
+    corr_matrix = df.corr(method='pearson')
+    plt.figure(figsize=(20, 16))
+    
+    #Create heatmap
+    sns.heatmap(corr_matrix, annot=False, cmap='plasma', robust=True)
+    
+    plt.title('Correlation Matrix of Factors and Stock Returns')
+    plt.tight_layout()
+    plt.show()
+
+    return corr_matrix
+
+
+def plot_cum_returns(df):
+    # Set up the plot
+    plt.figure(figsize=(15, 8))
+    
+    cum_returns = df.cumsum()
+    
+    for column in cum_returns.columns:
+        plt.plot(cum_returns.index, cum_returns[column], label=column)
+    
+        # Customize the plot
+    plt.title('Cumulative Log Returns of Stocks Over Time')
+    plt.xlabel('Date')
+    plt.ylabel('Cumulative Log Returns')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.grid(True, linestyle='--', alpha=0.6)
+    
+    # Improve the x-axis date formatting
+    plt.gcf().autofmt_xdate()
+    
+    # Adjust layout to prevent cutting off labels
+    plt.tight_layout()
+    
+    # Show the plot
+    plt.show()
 
 
 #TODO calculate kurtosis and skewness
@@ -66,5 +107,14 @@ def  eda_run():
         
     utils.five_fig_plot(returns_norm)
     
-    plot_weekly_variance(returns_norm)
+    plot_weekly_std(returns_norm)
+    
+    #Correlation Analysis
+    stock_factors_returns = pd.concat(data, axis=1)
+    corr_matrix = correlation_analysis(stock_factors_returns)
+    print("Correlation matrix of the entire dataset:")
+    print(corr_matrix)
+    print("Stocks cumulative returns:")
+    plot_cum_returns(data['Stock returns'])
+    
     return

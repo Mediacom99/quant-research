@@ -5,15 +5,19 @@ using PCA on factors and a linear multi-factor model (Linear regression).
 
 """
 
+from matplotlib import pyplot as plt
 import utils
 from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.multioutput import MultiOutputRegressor
+
+import eda 
 
 #Calculate PCA over given dataframe, returing the transformed data
 #It keeps enough PC to reach a certain variance passed as parameter (between 0 and 1)
-def pca_transform_wrapper(factors:pd.DataFrame, desired_var:float = 0.8, print_loadings:bool = False):
+def pca_transform_wrapper(factors:pd.DataFrame, desired_var:float = 0.95, print_loadings:bool = False):
     
     pca = PCA()
     feature_names = factors.columns
@@ -43,8 +47,7 @@ def pca_transform_wrapper(factors:pd.DataFrame, desired_var:float = 0.8, print_l
     factor_df = pd.DataFrame(factor_training, columns=[f'PC{i}' for i in range(n_components)], index=factors.index)
     
     return factor_df    
-
-
+   
 
 def model_train():
     
@@ -64,19 +67,67 @@ def model_train():
         if(df != 'Stock returns'):
             factor_training[df], factor_testing[df] = utils.divide_df_lastyear(data[df])
             
-    pca_factors = pd.concat(factor_training, axis=1) #Merge all factors into one bing dataframe        
+    #pca_factors = pd.concat(factor_training, axis=1) #Merge all factors into one bing dataframe        
     
-    #Perform PCA
-    #Perform Linear Regression
-    #Forecast returns into testing
-    print("Factors covariance matrix before PCA:")
-    print(pca_factors.cov())
+    #Desired percentage of variance to explain with principal components
+    desired_var = 0.95
     
-    trans = pca_transform_wrapper(factors=pca_factors, desired_var=1)
+    #PCA on Macro and Fundamentals
+    pca_factors_macro_fund = pd.concat([factor_training['Macro indices'], factor_training['Fundamentals']], axis=1)
+    #print("Factors covariance matrix before PCA:")
+    #print(pca_factors.cov())
     
-    print("Factors covariance matrix after PCA:")
-    print(utils.clean_cov_matrix(trans, 0.00001))
-        
+    macro_fund_trans = pca_transform_wrapper(factors=pca_factors_macro_fund, desired_var=desired_var)
+    #print("Factors covariance matrix after PCA:")
+    #print(utils.clean_cov_matrix(trans, 0.00001))
+    
+    
+    pca_factors_final = pd.concat([
+                            factor_training['Rates returns'],
+                            factor_training['Forex returns'],
+                            factor_training['Commodities returns'],
+                            macro_fund_trans], axis=1)
+    
+    final_pca_trans = pca_transform_wrapper(factors=pca_factors_final, desired_var=desired_var)
+    
+    print(utils.clean_cov_matrix(final_pca_trans, 0.00001))
+    
+    
+    
+    #Regression of returns_training against final_pca_trans
+    
+    #Create lagged factors dataframe
+    factors = final_pca_trans.shift(periods=1, freq='B').dropna()
+    
+    # I have to remove the first row of returns and the last row of factors (because of the shift)
+    factors = factors.drop(factors.index[-1])
+    returns = returns_training.drop(returns_training.index[0])
 
     
+    
+    
+    model = MultiOutputRegressor(LinearRegression())
+    a = model.fit(factors, returns)
+    
+    
+    # Get coefficients and intercepts
+    coefficients = np.array([estimator.coef_ for estimator in model.estimators_])
+    intercepts = np.array([estimator.intercept_ for estimator in model.estimators_])
+
+    # Create a DataFrame of coefficients
+    coef_df = pd.DataFrame(coefficients.T, 
+                        columns=returns.columns, 
+                        index=factors.columns)
+
+    print("\nCoefficients:")
+    print(coef_df)
+
+    print("\nIntercepts:")
+    print(pd.Series(intercepts, index=returns.columns))
+    
+    print("Residuals: ")
+    osl_residuals = returns - model.predict(factors)
+    
+    #TODO compare different methods of regression (Elastic Net, OSL, GSL, RandomForest, GradientBoosting)
+        
     return
