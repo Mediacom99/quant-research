@@ -98,7 +98,7 @@ def five_fig_plot(df:pd.DataFrame):
     # Colors for each stock
     colors = ['blue', 'green', 'red', 'purple', 'orange']
 
-        # Plot for each stock
+    # Plot for each stock
     for i, column in enumerate(df.columns):
         data = df[column]
         
@@ -107,20 +107,20 @@ def five_fig_plot(df:pd.DataFrame):
         print(mu,std)
         
         # Plot the histogram
-        axs[i].hist(data, bins=50, density=True, alpha=0.7, color=colors[i])
+        axs[i].hist(data, bins=250, density=True, alpha=0.7, color=colors[i])
         
         # Plot the PDF
         xmin, xmax = axs[i].get_xlim()
-        x = np.linspace(xmin, xmax, 100)
+        x = np.linspace(xmin, xmax, 500)
         p = stats.norm.pdf(x, mu, std)
         axs[i].plot(x, p, 'k', linewidth=2)
         
-        axs[i].set_title(f'{column} Returns')
+        axs[i].set_title(f'{column}')
         axs[i].set_xlabel('Returns')
         axs[i].set_ylabel('Density')
 
     # Plot all stocks together
-    axs[5].set_title('All Stocks')
+    axs[5].set_title('All Stocks Indices')
     axs[5].set_xlabel('Returns')
     axs[5].set_ylabel('Density')
 
@@ -130,3 +130,16 @@ def five_fig_plot(df:pd.DataFrame):
     plt.tight_layout()
     plt.show()
     return
+
+#log transform dataframe
+def log_transform(df):
+    # Make a copy of the DataFrame to avoid modifying the original
+    df_log = df.copy()
+    
+    # Select numeric columns
+    numeric_columns = df_log.select_dtypes(include=[np.number]).columns
+    
+    # Apply log(1 + x) transformation to numeric columns
+    df_log[numeric_columns] = np.log1p(df_log[numeric_columns])
+    
+    return df_log

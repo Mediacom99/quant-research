@@ -40,6 +40,10 @@ def clean_data_run():
     # Xls is the excel file with different sheets, each one will become a certain dataframe
     data = utils.get_data_from_excel('./data/data.xlsx')
     
+    #Log transformation of macro indices and fundamentals
+    data['Macroeconomics'] = utils.log_transform(data['Macroeconomics'])
+    data['Fondamentali Indici Azionari'] = utils.log_transform(data['Fondamentali Indici Azionari'])
+    
     ## DATA CLEANING
     print("INFO: cleaning dataframes...")
     for df in data:

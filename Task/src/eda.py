@@ -110,8 +110,8 @@ def  eda_run():
     plot_weekly_std(returns_norm)
     
     #Correlation Analysis
-    stock_factors_returns = pd.concat(data, axis=1)
-    corr_matrix = correlation_analysis(stock_factors_returns)
+    stock_factors_df = pd.concat(data, axis=1)
+    corr_matrix = correlation_analysis(stock_factors_df)
     print("Correlation matrix of the entire dataset:")
     print(corr_matrix)
     print("Stocks cumulative returns:")

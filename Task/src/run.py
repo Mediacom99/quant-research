@@ -1,6 +1,10 @@
 # Main file, only this file should be executed
 #TODO add some user input (just clean, do everythig, only train and so on)
 
+# OSL : -1.2259240622777985
+# Huber: broken
+# SDG regressor: -1.1186912582156785
+
 # Custom modules
 import eda
 import clean_data

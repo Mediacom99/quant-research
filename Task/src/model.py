@@ -10,14 +10,16 @@ import utils
 from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, HuberRegressor, SGDRegressor, ElasticNet, LassoLarsIC, TweedieRegressor
+from sklearn.svm import LinearSVC
+from sklearn.model_selection import cross_val_score, TimeSeriesSplit
 from sklearn.multioutput import MultiOutputRegressor
 
 import eda 
 
 #Calculate PCA over given dataframe, returing the transformed data
 #It keeps enough PC to reach a certain variance passed as parameter (between 0 and 1)
-def pca_transform_wrapper(factors:pd.DataFrame, desired_var:float = 0.95, print_loadings:bool = False):
+def pca_transform_wrapper(factors:pd.DataFrame, n_components = 5, print_loadings:bool = False):
     
     pca = PCA()
     feature_names = factors.columns
@@ -26,8 +28,9 @@ def pca_transform_wrapper(factors:pd.DataFrame, desired_var:float = 0.95, print_
     
     
     #Choose number of components
-    n_components = np.argmax(cumulative_variance_ratio >= desired_var) + 1
-    print(f"Number of components explaining {desired_var*100}% of variance: {n_components}")
+    #n_components = np.argmax(cumulative_variance_ratio >= desired_var) + 1
+    #print(f"Number of components explaining {desired_var*100}% of variance: {n_components}")
+    print(f"Number of Principal Components to keep: {n_components}")
     
     pca = PCA(n_components=n_components)
     factor_training = pca.fit_transform(factors) #New factor_training dataset after PCA
@@ -47,7 +50,56 @@ def pca_transform_wrapper(factors:pd.DataFrame, desired_var:float = 0.95, print_
     factor_df = pd.DataFrame(factor_training, columns=[f'PC{i}' for i in range(n_components)], index=factors.index)
     
     return factor_df    
-   
+
+#Linear regression of Y against X
+# Y -> stock returns
+# X -> pca-factors-lagged (1-d)
+def linear_regression_model_train(Y, X, model = SGDRegressor(loss='huber', shuffle=False), predict_data = pd.DataFrame()):
+     
+    
+    print(f"Current selected module is: {model}")
+    model = MultiOutputRegressor(model)
+    
+    print(f"INFO: model {model} is calculating weights:")
+    model.fit(X, Y)
+    
+    # Get coefficients and intercepts
+    coefficients = np.array([estimator.coef_ for estimator in model.estimators_])
+    intercepts = np.array([estimator.intercept_ for estimator in model.estimators_])
+
+    # Create a DataFrame of coefficients
+    coef_df = pd.DataFrame(coefficients.T, 
+                        columns=Y.columns, 
+                        index=X.columns)
+
+    print("Factors exposures:")
+    print(coef_df)
+
+    print("Intercepts:")
+    intercepts = pd.DataFrame(intercepts, columns=['Intercepts'], index = Y.columns)
+    print(intercepts)
+    
+    #Instance of timeSeriesSplit class
+    res = cross_val_score(model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits = 5), error_score='raise', scoring='r2')
+    print("Array of scores of the estimator for each run in the cross validation")
+    print(res)
+    print("Score mean: ", res.mean())
+    
+    print("Residuals mean: ")
+    y_pred = model.predict(X)
+    residuals = (Y - y_pred)
+    print(residuals.mean())
+    
+    if (predict_data.empty):
+        print("INFO: no predict_data provided. Forecasted data will be returned empty.")
+        forecast = []
+    else:
+        forecast = model.predict(predict_data)
+        forecast = pd.DataFrame(forecast, columns = Y.columns)
+    
+    return (coef_df, intercepts, forecast)
+
+###########################################################################################
 
 def model_train():
     
@@ -66,68 +118,77 @@ def model_train():
     for df in data:
         if(df != 'Stock returns'):
             factor_training[df], factor_testing[df] = utils.divide_df_lastyear(data[df])
-            
-    #pca_factors = pd.concat(factor_training, axis=1) #Merge all factors into one bing dataframe        
+    
+
     
     #Desired percentage of variance to explain with principal components
-    desired_var = 0.95
+    desired_var = 0.85
     
-    #PCA on Macro and Fundamentals
+    #FIXME I HAVE TO APPLY PCA TO ALL THE FACTORS DATA I HAVE, THEN I DIVIDE IT INTO DIFFERENT SETS
+            #OTHERWISE I WILL GET DIFFERENT NUMBER OF PCA
+    
+    #Dataframe for PCA on Macro and Fundamentals
     pca_factors_macro_fund = pd.concat([factor_training['Macro indices'], factor_training['Fundamentals']], axis=1)
-    #print("Factors covariance matrix before PCA:")
-    #print(pca_factors.cov())
     
-    macro_fund_trans = pca_transform_wrapper(factors=pca_factors_macro_fund, desired_var=desired_var)
-    #print("Factors covariance matrix after PCA:")
-    #print(utils.clean_cov_matrix(trans, 0.00001))
+    #Dataframe for PCA on Macro and Fundamentals for testing
+    pca_factors_macro_fund_test = pd.concat([factor_testing['Macro indices'], factor_testing['Fundamentals']], axis=1)
     
     
+    #PCA run over only macro and fund
+    macro_fund_trans = pca_transform_wrapper(factors=pca_factors_macro_fund)
+    
+    #PCA run over only macro and fund for testingn
+    macro_fund_trans_test = pca_transform_wrapper(factors=pca_factors_macro_fund_test)
+    
+    
+    # Dataframe containig all the factors onto which to perform the last PCA run. 
     pca_factors_final = pd.concat([
                             factor_training['Rates returns'],
                             factor_training['Forex returns'],
                             factor_training['Commodities returns'],
                             macro_fund_trans], axis=1)
     
-    final_pca_trans = pca_transform_wrapper(factors=pca_factors_final, desired_var=desired_var)
     
-    print(utils.clean_cov_matrix(final_pca_trans, 0.00001))
+    # Dataframe containig all the factors onto which to perform the last PCA run. (For testing) 
+    pca_factors_final_test = pd.concat([
+                            factor_testing['Rates returns'],
+                            factor_testing['Forex returns'],
+                            factor_testing['Commodities returns'],
+                            macro_fund_trans_test], axis=1)
     
     
+    #Final PCA-Transformed factors
+    final_pca_trans = pca_transform_wrapper(factors=pca_factors_final)
     
-    #Regression of returns_training against final_pca_trans
+    #Final PCA-Transformed factors for testing
+    final_pca_trans_test = pca_transform_wrapper(factors=pca_factors_final_test)
+    
     
     #Create lagged factors dataframe
-    factors = final_pca_trans.shift(periods=1, freq='B').dropna()
+    factors_lag = final_pca_trans.shift(periods=1, freq='B').dropna()
+    factors_lag_test = final_pca_trans_test.shift(periods=1, freq='B').dropna()
+    # Remove the first row of returns and the last row of factors (because of the shift)
+    factors_lag = factors_lag.drop(factors_lag.index[-1])
+    factors_lag_test = factors_lag_test.drop(factors_lag_test.index[-1])
     
-    # I have to remove the first row of returns and the last row of factors (because of the shift)
-    factors = factors.drop(factors.index[-1])
+    #Fix returns dataframe for matching lagged factors
     returns = returns_training.drop(returns_training.index[0])
+    
 
-    
-    
-    
-    model = MultiOutputRegressor(LinearRegression())
-    a = model.fit(factors, returns)
-    
-    
-    # Get coefficients and intercepts
-    coefficients = np.array([estimator.coef_ for estimator in model.estimators_])
-    intercepts = np.array([estimator.intercept_ for estimator in model.estimators_])
+    print("\n")
 
-    # Create a DataFrame of coefficients
-    coef_df = pd.DataFrame(coefficients.T, 
-                        columns=returns.columns, 
-                        index=factors.columns)
-
-    print("\nCoefficients:")
-    print(coef_df)
-
-    print("\nIntercepts:")
-    print(pd.Series(intercepts, index=returns.columns))
+    X = factors_lag
+    Y = returns
+   
+    print("\n\n\n\n\n  TRUE VALUES RETURNS AND COV")
+    print(returns_testing.mean())
+    print(returns_testing.cov())
     
-    print("Residuals: ")
-    osl_residuals = returns - model.predict(factors)
-    
-    #TODO compare different methods of regression (Elastic Net, OSL, GSL, RandomForest, GradientBoosting)
+    print("SGD WITH HUBER LOSS")
+    weights, intercepts, forecast = linear_regression_model_train(Y, X, predict_data=factors_lag_test)
+    print("\n\n\n\n\n FORECASTED RETURNS AND COV")
+    print(forecast.mean())
+    print(forecast.std())
+                    
         
     return
