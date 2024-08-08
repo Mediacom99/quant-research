@@ -189,7 +189,7 @@ def model_train():
     # I calculate this for every week and use it in the optimization process
     returns_cov_forecast_formula = weights.values@factors_lag.cov().values@np.transpose(weights.values) + residuals.cov().values
     
-    
+
     #IMPLEMENT OPTIMIZATION
 
     
