@@ -1,7 +1,8 @@
+
 """
 
 This module deals with training the model and forecasting returns based on factors
-using PCA on factors and a linear multi-factor model (Linear regression).
+using PCA on factors and a linear multi-factor model.
 
 """
 
@@ -30,7 +31,7 @@ def pca_transform_wrapper(factors:pd.DataFrame, n_components = 5, print_loadings
     #Choose number of components
     #n_components = np.argmax(cumulative_variance_ratio >= desired_var) + 1
     #print(f"Number of components explaining {desired_var*100}% of variance: {n_components}")
-    print(f"Number of Principal Components to keep: {n_components}")
+    # print(f"Number of Principal Components to keep: {n_components}")
     
     pca = PCA(n_components=n_components)
     factor_training = pca.fit_transform(factors) #New factor_training dataset after PCA
@@ -54,10 +55,11 @@ def pca_transform_wrapper(factors:pd.DataFrame, n_components = 5, print_loadings
 #Linear regression of Y against X
 # Y -> stock returns
 # X -> pca-factors-lagged (1-d)
+# SGDRegressor(loss='huber', shuffle=False)
 def linear_regression_model_train(Y, X, model = SGDRegressor(loss='huber', shuffle=False), predict_data = pd.DataFrame()):
      
     
-    print(f"Current selected module is: {model}")
+    print(f"INFO: current selected module is: {model}")
     model = MultiOutputRegressor(model)
     
     print(f"INFO: model {model} is calculating weights:")
@@ -72,17 +74,18 @@ def linear_regression_model_train(Y, X, model = SGDRegressor(loss='huber', shuff
                         columns=Y.columns, 
                         index=X.columns)
 
-    print("Factors exposures:")
-    print(coef_df)
+    # print("Factors exposures:")
+    # print(coef_df)
 
-    print("Intercepts:")
+
     intercepts = pd.DataFrame(intercepts, columns=['Intercepts'], index = Y.columns)
-    print(intercepts)
+    # print("Intercepts:")
+    # print(intercepts)
     
     #Instance of timeSeriesSplit class
     res = cross_val_score(model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits = 5), error_score='raise', scoring=None)
-    print("Array of scores of the estimator for each run in the cross validation")
-    print(res)
+    # print("Array of scores of the estimator for each run in the cross validation")
+    # print(res)
     print("Score mean: ", res.mean())
     
     print("Residuals mean: ")
@@ -169,8 +172,6 @@ def model_train():
     # Remove the first row of returns and the last row of factors (because of the shift)
     factors_lag = factors_lag.drop(factors_lag.index[-1])
     factors_lag_test = factors_lag_test.drop(factors_lag_test.index[-1])
-    
-    #Fix returns dataframe for matching lagged factors
     returns = returns_training.drop(returns_training.index[0])
     
 
@@ -179,21 +180,38 @@ def model_train():
     X = factors_lag
     Y = returns
     
-    print("SGD WITH HUBER LOSS")
     residuals, weights, intercepts, forecast = linear_regression_model_train(Y, X, predict_data=factors_lag_test)
-    print("\n\n\n\n\n FORECASTED RETURNS AND COV")
-    print(forecast.mean())
-    print(forecast.std())
-    print("\n\n\n\n")
+    
+    # print("\n\n\n\n\nFORECASTED RETURNS AND COV")
+    # print(forecast.mean())
+    # print(forecast.std())
+    # print("\n\n\n\n")
     
     # I calculate this for every week and use it in the optimization process
-    returns_cov_forecast_formula = weights.values@factors_lag.cov().values@np.transpose(weights.values) + residuals.cov().values
+    final_cov = weights.values@factors_lag.cov().values@np.transpose(weights.values) + residuals.cov().values
+
+    import optimize as op
+    op_w = op.optimize_get_weights(final_cov)
+    print("Optimized weights:")
+    print(op_w)
+
+    #Calculate Sharpe ratio and other stuff
+
+    # print("\n\n\nPORTFOLIO STUFF:")
+
+    daily_portfolio_returns = returns_testing.dot(op_w)
     
+    portfolio_daily_cumulative = daily_portfolio_returns.cumsum()
+
+    portfolio_mean = daily_portfolio_returns.mean()
+    portfolio_std = np.sqrt(op_w.T @ final_cov @ op_w)
+
+    print(portfolio_daily_cumulative.tail())
+    print("Portfolio mean:", portfolio_mean)
+    print("Portfolio standard deviation: ", portfolio_std)
 
     #IMPLEMENT OPTIMIZATION
 
-    
-    
     
     #TODO cross_val_score of all the linear models to see which one performs better
     #TODO calculate forecasted variance matrix and compare with the one calculated using weights

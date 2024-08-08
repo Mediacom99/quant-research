@@ -31,9 +31,9 @@ The first question requires an assumption, usually it is required that either th
 \end{equation}
 where: $\Vec{r} = (r_1, r_2, r_3, r_4, r_5)$ is the stock returns vector, $\Vec{\sigma} = (\sigma_1, \dots, \sigma_5)$ is the vector of stock returns' standard deviations.
 
-The  portfolio returns will follow this normal multivariate distribution:
+The  portfolio return will follow this normal  distribution:
 \begin{equation}
-        \Vec{r_p} = N(\Vec{w}\cdot\Vec{\mu}, \Vec{w}^{T}\mathbf{\Sigma}\Vec{w})
+        r_p = N(\Vec{w}\cdot\Vec{\mu}, \Vec{w}^{T}\mathbf{\Sigma}\Vec{w})
 \end{equation}
 where: $\Vec{w}$ is the vector of weights which will define the portfolio allocation. The weights are the result of the optimization process. $\Sigma = (\sigma_{i,j})$ ($i,j = 1,...,5)$ is the covariance matrix of expected returns.
 Normality is not really required for the multi-factor model but it is required when optimizing the portfolio using a risk-parity approach where all the information present in the objective function solely comes from the covariance matrix of the forecasted stock returns. This needs to be taken into account when interpreting both the model and the portfolio optimization results.
@@ -45,7 +45,7 @@ Now for the second question we need another assumption: the relationship between
     r_i = a_i + B_{1,i}F_{1,i} + ... + \epsilon_i
     \label{multifactor}
 \end{equation}
-where $\epsilon$ is the random error from the regression model used to determine the parameters in the above equation. The only thing a linear regression model requires is the normality of $\epsilon$. Also it would help to have factor returns that are not correlated between each other, in order to lower the probability of overfitting.
+where $\epsilon$ is the random error from the regression model used to determine the parameters in the above equation. The only thing an ordinary least squares linear regression model requires is the normality of $\epsilon$. For this reason we will show the performance of different linear regressor that are more robust and do not need the residuals to be normally distributed .Also it would help to have factor returns that are not correlated between each other, in order to lower the probability of overfitting.
 
 Finally to tackle the problem of choosing the factors and at the same time dealing with correlation between factors I decided to use Principal Component Analysis on the factors in order to reduce their dimensionality by choosing only the first $K$ principal components such that a certain percentage of the total variance of the factors is explained, usually around $80-90\%$ is used.
 
