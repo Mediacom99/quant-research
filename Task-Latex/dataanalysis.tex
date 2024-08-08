@@ -1,0 +1,79 @@
+This stage is dedicated to extracting as much information as possible on the cleaned data. This step is necessary to have an idea of what kind of data we have in order to be able to correctly inteprept the results of the chosen model and understand its limitations.
+The data used in this test is from the 'formatted-data.xlsx' file. It has only been cleaned and scaled to zero mean and unit variance when necessary. It has not yet been divided into training and testing.
+The custom python module \textbf{eda.py} is dedicated to this section.
+
+\subsection{Normality}
+The assumption that stock returns follow a univariate normal distribution not always holds for financial data. When it does, at least approximately, calculation and interpretation of calculations tend to be easier because most of the data information can be captured by the first two moments: mean and variance. For this reason the stock returns data is checked against a standardized gaussian distribution to understand each stock's behaviour and understand how heavy the assumption of data distributed normally is.
+
+In Table \ref{tab:stock-fit-gaussian} the results of fitting each stock returns against a normalized Gaussian distribution are shown. The data has been standardized to unit variance and zero mean. For each asset the first four moments are provided, as well as  the p-value for the Anderson-Darling test. The ratio for p-value acceptance is $0.05\%$. For this calculation I used the function \textit{scipy.stats.goodness\_of\_fit} from the python library \textit{Scipy}.
+The reference values for a normalized Gaussian distribution are:
+\begin{itemize}
+    \item Mean: $0$
+    \item Standard Deviation: $1$
+    \item Skewness: $0$
+    \item Excess Kurtosis (Kurtosis - $3$): $0$
+\end{itemize}
+
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+\begin{table}[htb]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Stock return}    & \textbf{Mean}          & \textbf{Standard deviation} & \textbf{Skewness}    & \textbf{Excess Kurtosis} & \textbf{Anderson-Darling p-value} \\ \hline
+Indice Azionario Paese 1 & -6.701652777742044e-18 & 1.0001179175760244          & -0.26527445129737953 & 6.252408544066505        & 0.0001                            \\ \hline
+Indice Azionario Paese 2 & 1.0052479166613066e-17 & 1.0001179175760244          & -0.06867531417815065 & 6.560510364685937        & 0.0001                            \\ \hline
+Indice Azionario Paese 3 & -3.350826388871022e-18 & 1.0001179175760244          & -0.06963505684987985 & 7.389173595223623        & 0.0001                            \\ \hline
+Indice Azionario Paese 4 & 4.607386284697655e-18  & 1.0001179175760244          & -0.06963505684987985 & 9.171379931995125        & 0.0001                            \\ \hline
+Indice Azionario Paese 5 & -7.539359374959799e-18 & 1.0001179175760244          & -0.15364747544085475 & 8.853385699414373        & 0.0001                            \\ \hline
+\end{tabular}%
+}
+\caption{Descriptive statics and results of fit of stock returns against a standardized Gaussian distribution.}
+\label{tab:stock-fit-gaussian}
+\end{table}
+
+\begin{figure}[htb]
+\centering
+\includesvg[width=\textwidth]{"Images/Normality_Stock_Returns_Combined.svg"}
+\caption{Comparison of stock returns fits against a standardized Gaussian distribution}
+\label{fig:stock-returns-normal}
+\end{figure}
+
+As we can see both from the plot in Figure \ref{fig:stock-returns-normal} and Table \ref{tab:stock-fit-gaussian} the problem is clear: the first two moments are extremely close to being those of a standardized gaussian, in fact the shape of the histogram is not extremely different from that of gaussian distributed data. The skewness is relatively small, in fact we cannot see any extreme rupture of symmetry to the right or left. The problem is exactly the excess kurtosis which is way too big, because of the huge amount of data clustering at the center, which would make the gaussian distribution way too peaked. This also explains the low pvalue of the Anderson-Darling test which by taking into account the skewdness of the data has to conclude that the data is not normal. There have been proposed ways of modeling the stock returns as more complex distributions, like elliptical distributions as shown in \cite{risk-parity-hard}.
+
+
+
+\subsection{Time Dependence}
+Stationarity is a very important characteristic of financial data. It has to be taken into consideration especially when using Multi-Factor models that do not inherently consider the time relations between data. Also the assumption of stock returns following a normal distribution requires a non time-varying mean and standard deviation. For this reason in Figure \ref{fig:stock-std-plot} are shown the time plots of the weekly standard deviation of the stock returns.
+
+As we can see the variance is mostly oscillating between $0$ and $1$, apart from huge spikes of volatility in the stock returns that coincide with periods of extreme economic uncertainty (like the 2007-2009 "Great Recession"). This needs to be taken into account when interpreting the portfolio results, especially to understand how much the model can adapt to sudden changes in the market.
+
+\begin{figure}[htb]
+\centering
+\includesvg[width=\textwidth]{Images/Stock_returns_week_variance.svg}
+\caption{Comparison of stock returns fits against a standardized Gaussian distribution}
+\label{fig:stock-std-plot}
+\end{figure}
+
+
+\subsection{Correlation Analysis}
+Linear correlation between factors and stock is extremely important to study in order to efficiently implement Principal Component Analysis on the factors and understand the correlation between factors and stock returns. The correlation between factors will be eliminated choosing the direction of greater variance using PCA. As we can see in Figure \ref{fig:correlation-heatmap} there are two main areas of relative higher correlation: between the stock returns (top-left) and between macroeconomic indices and fundamentals of the stock returns (triangle below the diagonal).
+For this reason I will first apply PCA between Macro indices and fundamentals. Then I will apply again PCA between the results of the previous steps and the rest of the data, apart from the stock returns, on which no PCA will be applied.
+
+\begin{figure}[htb]
+\centering
+\includesvg[width=\textwidth]{Images/data-correlation-heatmap.svg}
+\caption{Correlation matrix heatmap of the whole dataset given as input for this task}
+\label{fig:correlation-heatmap}
+\end{figure}
+
+\subsection{Historical data visualization}
+Another very important piece of information can be extracted from the historical behaviour of the stock returns throughout the whole dataset. In Figure \ref{fig:cum-log-returns} the stock returns are plotted against time, from the first to the last date available in the dataset. As we can see the stock index for Country 1, 2, 3 and 4 close the timeframe with a positive log return, while the index stock of Country 5 closed with a negative log return. Also we can see that the stock index of the first country has the greatest return over this time-period, while Country 2, 3 and 4 were pretty close during the entire time-frame. These information must be kept in mind when evaluating the allocation of these assets in the portfolio. 
+
+\begin{figure}[htb]
+\centering
+\includesvg[width=\textwidth]{Images/log-cumulative-returns.svg}
+\caption{Cumulative log returns for each stock index over the entire dataset time period}
+\label{fig:cum-log-returns}
+\end{figure}

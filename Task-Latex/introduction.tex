@@ -1,0 +1,14 @@
+
+
+
+This is the report for the task assigned to me by the team at Minerva Technologies. The purpose of this task is to develop a long-only trading model of five stock indices resulting in a portfolio weight matrix. The input data is comprised of daily historical logarithmic returns from the 30th September 2003 to the 31st December 2019 for the five stock indices, as well as a series of other factors: rates, commodities, Forex currency crossings. Macroeconomic indices of the stock indices' countries and fundamentals of the stock were also given.
+
+Given the amount of data and task's objective I decided to use a simple but effective model: the portfolio will be optimized using a risk-parity approach were the allocation of assets is determined by imposing that each asset's contribution to the portfolio total variance is equal. In order to find the covariance matrix of expected returns based on the historical data, necessary to optimize the portfolio, I decided to use a linear multi-factor model combined with Principal Component Analysis on the factors in order to reduce their dimensionality but also eliminate linear correlation between factors, grouping them by how much they contribute to the overall variation of the factors data.
+
+The model will be tested by dividing the dataset as follows: the last year of data will be reserved as the testing data, the rest will be used for training purposes.
+For each week the model will be retrained and the weights recalculated in order to calculate the portfolio weight matrix and test the portfolio return and volatility.
+Maybe I can also do K-Fold Cross validation or use a rolling-window approach to test the model in different time periods. 
+
+Even though normality is required only for the residuals of the linear regression, having data that is approximately normally distributed makes calculation easier since most of the information is captured by the first two moments: mean and variance. For this reason Section \ref{dataanalysis} is dedicated to testing data for its normality as well as for stationarity and cross-asset relationships to better understand the nature of the data and better interpret the result of the model.
+
+This approach is very simple and disregards completely financial data that shows heavy time dependence and non-linear relations with the factors. To treat this kind of data, more complicated models can be explored, such as a Long Short-Term Memory recurrent neural network paired with Layerwise Relevance Propagation to interpret the expected output of the neural network (CITATION NEEDED). The same goes for the risk parity approach that can be improved by considering non-normally distributed returns(CITATION NEEDED).

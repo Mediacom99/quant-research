@@ -1,0 +1,88 @@
+% Remember, OSL requires no colinearità, no varying variance, and most of the test Im going to do require normality.
+% The neural network might be a better choice to also consider time-varying and non-linear multi-factor model
+% Model training: 
+% \begin{enumerate}
+%     \item Principal Component Analysis on the factors for reducing number of factors and removing the colinearity problem that might break OSL. I should also perform PCA both between all assets and between assets of same category (forex, commodities, rates, fundamentals, macro).
+%     \item Arbitrage Pricing Theory + Linear Regression of returns against factors (multifactor-model with linear regression)
+%     \item Long Short-Term Memory neural network + Layer-wise Relevance Propagation (LRP) for interpreting results, as shown in \cite{nakagawa}
+% \end{enumerate}
+
+% What are the assumptions of PCA + APT + OSL ? Does the data I have make sense ?
+% Of course I can say its gonna be better with the neural network.
+
+% Test model performance against out of sample data. Calculate relevant numbers to understand performance. 
+
+% Write what model are you using to describe the returns and their relationship with the factors. Also describe PCA on factors, how does it work ? Then explain how you proceeded in practice: splitting datasets, what algorithm used, check for normality and other stuff on residuals. If residuals are bad I can change regression algorithm.
+% If I want I can also change PCA methods. Or apply PCA on every factors or just between assets factors or dividing each factor based on the country.
+
+% Instead of trying to understand the complexity and time-variance of stocks returns by fitting a very weird and complicated curve on the data, it could make sense to trade 'locally' on that curve, by locally I mean trading in a small enought time scale such that it could make sense to approximate the relations between factors and stocks as linear. That is why this model needs to have a frequent rebalancing history. (Maybe it could be nice to implement using different training data, like more modern or older, and using weights as a mean of those ones).
+
+% REMEMBER: if osl does not work maybe I can use data in a smaller time frame, like last 2-3 years or 1 year and use rolling window.
+
+
+This section describes the process of implementing and training a multi-factor model in conjunction with Principal Component Analysis on the factors for forecasting expected returns and volatility to later use for the portfolio optimization.
+
+First it's important to establish the goal of this model: finding a relationship between stock returns and all the other historical daily data in the dataset, which we will call factors (rates, currency crossings, commodities, macro indices, fundamentals of stock), such that it's possible to use this relationship to forecast future expected stock returns knowing the values of the factor at the current time.
+Three main questions immediately come to mind: \textbf{what distribution should one use to model stock returns as random variables ? What kind of mathematical relationship is there between the factors and the stock returns ? How should one choose which factors to use ?} 
+
+The first question requires an assumption, usually it is required that either the actual returns or the log returns follow a normal distribution. As shown in the previous section, the stock log returns are 'decently' close to being described by a normal distribution if not for the presence of clustering near the center and not normal tails. For this task we will proceed as if the stock returns (as logarithmic daily data) follow a univariate gaussian distribution so that the vector of stocks follows a multivariate normal distribution:
+\begin{equation}
+    \Vec{r} = N(\Vec{\mu}, \Vec{\sigma})
+\end{equation}
+where: $\Vec{r} = (r_1, r_2, r_3, r_4, r_5)$ is the stock returns vector, $\Vec{\sigma} = (\sigma_1, \dots, \sigma_5)$ is the vector of stock returns' standard deviations.
+
+The  portfolio returns will follow this normal multivariate distribution:
+\begin{equation}
+        \Vec{r_p} = N(\Vec{w}\cdot\Vec{\mu}, \Vec{w}^{T}\mathbf{\Sigma}\Vec{w})
+\end{equation}
+where: $\Vec{w}$ is the vector of weights which will define the portfolio allocation. The weights are the result of the optimization process. $\Sigma = (\sigma_{i,j})$ ($i,j = 1,...,5)$ is the covariance matrix of expected returns.
+Normality is not really required for the multi-factor model but it is required when optimizing the portfolio using a risk-parity approach where all the information present in the objective function solely comes from the covariance matrix of the forecasted stock returns. This needs to be taken into account when interpreting both the model and the portfolio optimization results.
+I COULD CITE THE TEXTBOOK I USED!
+
+
+Now for the second question we need another assumption: the relationship between the stock returns and the chosen factors is \textbf{linear}, so:
+\begin{equation}
+    r_i = a_i + B_{1,i}F_{1,i} + ... + \epsilon_i
+    \label{multifactor}
+\end{equation}
+where $\epsilon$ is the random error from the regression model used to determine the parameters in the above equation. The only thing a linear regression model requires is the normality of $\epsilon$. Also it would help to have factor returns that are not correlated between each other, in order to lower the probability of overfitting.
+
+Finally to tackle the problem of choosing the factors and at the same time dealing with correlation between factors I decided to use Principal Component Analysis on the factors in order to reduce their dimensionality by choosing only the first $K$ principal components such that a certain percentage of the total variance of the factors is explained, usually around $80-90\%$ is used.
+
+Equation \eqref{multifactor} can be written in vector-matrix notation:
+\begin{equation}
+    \Vec{r}_{t+1} = \vec{b_0} + \mathbf{B}\vec{F}_{t} + \vec{\epsilon}
+\end{equation}
+Where: $\mathbf{B} = (b_{i,j})$ is the matrix of factors exposures, $i$ runs over the number of stock returns (N) while $j$ runs over the number of factors (K) chosen for the regression model, thus it's a (N,K) matrix. The matrix of the factors exposures is the objective of the regression model. The vector $\vec{F}_{t}$ is a (1,K) vector which represents the factor at time t. The vector $\vec{r}_{t+1}$ represents the expected returns at time t+1. The vector $\vec{\epsilon}$ represents the vector of errors of the regression model.
+
+Given this model, it can be shown that the covariance matrix of expected returns can be written as:
+\begin{equation}
+    \mathbf{\Sigma} = \mathbf{B}\mathbf{\Sigma}_{F}\mathbf{B}^{T} + \mathbf{S}
+    \label{cov-matrix-returns}
+\end{equation}
+Where: $\mathbf{S}$ is a diagonal matrix consisting of each stocks' error $\epsilon$'s variance. $\mathbf{\Sigma}_{F}$ is the covariance matrix of the factors used in the regression model. Since we are using PCA, this matrix will always be diagonal.
+It is very important to notice that the only place where time dependence of data is considered is in the regression model where the stock returns of time t+1 are calculated based on the factors at time t. There are more sophisticated methods to model the time-dependence of data, for example using multiple lagged features, not only the day before, or using more advanced time series models like ARIMA or GARCH for capturing complex temporal patterns.
+
+There exists more complex models which incorporate both time-volatility and non-linear relations between stock returns and factors. For example in \cite{nakagawa} it is proposed the use of a Long Short-Term Memory Recurrent Deep Neural Network, combined with Layer-wise Relevant Propagation (LRP) in order to interpret the results. As they show in the table comparing different methods the LSTM + LRP model definitely outperforms the linear multi-factor model.
+
+The idea is to use a linear regression model to calculate both $\mathbf{B}$ and $\mathbf{S}$. Then it is possible to obtain the covariance matrix of expected returns and use it to optimize the portfolio as shown in Section \ref{optimization}.
+
+\subsection{Principal Component Analysis on Factors}
+% calcoli pca e butto assieme al multifactor model. Also YUou could use LASSO with Ridge regression (Elastic Net) before PCA.
+As we have seen in Figure \ref{fig:correlation-heatmap} the highest correlation is between Macro returns and Fundamentals. For this reason, and also to simply the interpretation of the remaining principal components, I decided to use standard PCA between Macro returns and Fundamentals. With these principal components selected I will run standard PCA again against all the other remaining factors.
+The standard Principal Components Analysis basically diagonalizes the covariance matrix and finds its eigenvectors. Using these eigenvectors as the transformation matrix it is possible to write every element of the initial base into the new base where the covariance matrix is diagonal. One can then choose how many principal components to keep, thus how many of the eigenvectors with the biggest eigenvalues to keep. These principal components are directions in the new base that explain the most variance of the analyzed data. CHECK THIS SHIT PARAGRAPH
+
+Ater PCA I was able to keep 19 principal components out of 56 total factors such that the remaining principal components explain $95$\% of the total variance of factors.
+
+ADD GRAPH OF PERCENTAGE OF FACTORS CONTRIBUTING TO THE TOP PRINCIPAL COMPONENT 
+
+\subsection{Cross Validation of Linear Regressors}
+Here I want to use k-fold cross validation (dividing using TimeSeries) to compare different linear regressor and see which one performs better on the training data.
+
+\subsection{Implementation}
+
+\begin{itemize}
+	\item Explain the linear regression model used and why we chose a Robust estimator (underlying normality of data assumption is not necessary)
+\end{itemize}
+
+

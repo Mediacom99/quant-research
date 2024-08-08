@@ -80,7 +80,7 @@ def linear_regression_model_train(Y, X, model = SGDRegressor(loss='huber', shuff
     print(intercepts)
     
     #Instance of timeSeriesSplit class
-    res = cross_val_score(model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits = 5), error_score='raise', scoring='r2')
+    res = cross_val_score(model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits = 5), error_score='raise', scoring=None)
     print("Array of scores of the estimator for each run in the cross validation")
     print(res)
     print("Score mean: ", res.mean())
@@ -97,9 +97,12 @@ def linear_regression_model_train(Y, X, model = SGDRegressor(loss='huber', shuff
         forecast = model.predict(predict_data)
         forecast = pd.DataFrame(forecast, columns = Y.columns)
     
-    return (coef_df, intercepts, forecast)
+    # coef_df are the weights of the regression, forecast is the data forecasted using those weights given a dataframe of test data
+    return (residuals, coef_df, intercepts, forecast)
 
 ###########################################################################################
+
+#This function should take the training data as input and return the covariance matrix of expected returns
 
 def model_train():
     
@@ -119,10 +122,6 @@ def model_train():
         if(df != 'Stock returns'):
             factor_training[df], factor_testing[df] = utils.divide_df_lastyear(data[df])
     
-
-    
-    #Desired percentage of variance to explain with principal components
-    desired_var = 0.85
     
     #FIXME I HAVE TO APPLY PCA TO ALL THE FACTORS DATA I HAVE, THEN I DIVIDE IT INTO DIFFERENT SETS
             #OTHERWISE I WILL GET DIFFERENT NUMBER OF PCA
@@ -179,16 +178,38 @@ def model_train():
 
     X = factors_lag
     Y = returns
-   
-    print("\n\n\n\n\n  TRUE VALUES RETURNS AND COV")
-    print(returns_testing.mean())
-    print(returns_testing.cov())
     
     print("SGD WITH HUBER LOSS")
-    weights, intercepts, forecast = linear_regression_model_train(Y, X, predict_data=factors_lag_test)
+    residuals, weights, intercepts, forecast = linear_regression_model_train(Y, X, predict_data=factors_lag_test)
     print("\n\n\n\n\n FORECASTED RETURNS AND COV")
     print(forecast.mean())
     print(forecast.std())
-                    
+    print("\n\n\n\n")
+    
+    # I calculate this for every week and use it in the optimization process
+    returns_cov_forecast_formula = weights.values@factors_lag.cov().values@np.transpose(weights.values) + residuals.cov().values
+    
+    
+    #IMPLEMENT OPTIMIZATION
+
+    
+    
+    
+    #TODO cross_val_score of all the linear models to see which one performs better
+    #TODO calculate forecasted variance matrix and compare with the one calculated using weights
+    #TODO once you have weekly data, perform optimization on the weekly data and check the portfolio
+    #TODO for each week I should also calcualte the RMSE for the model.
+    #TODO rebalance every week for the last year of data, for each week calculate what you need for the portfolio (return, variance, sharpe, var, svar)
+    #     (returns and variance are calculated using the true data)
+    
+    #The idea is:
+    # 1. calculate weights for current week, calculate portfolio weights and use them in that week.
+    # 2. add that week to the training data and repeat
+    # 3. do this for the last year kept as training data
+    # 4. check how the portfolio performs in that week
+    # 5. Then I can create the portfolio weight matrix for each week in that year (as excel file would be nice)
+    
+    #Maybe I can also do this in a monthly timeframe
+    
         
     return

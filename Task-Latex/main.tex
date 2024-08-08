@@ -1,0 +1,97 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{svg}
+\usepackage[T1]{fontenc} %Font stuff
+%\usepackage{tgcursor} %Font stuff
+\usepackage{graphicx} %Inserting images
+\usepackage[hidelinks]{hyperref} %References become hyperlinks to the referenced part
+%\graphicspath{ {images/} } %Path to images folder
+\usepackage{nameref} % Package for referencing sections and such
+\usepackage{caption} %for subfigures
+\usepackage{subcaption} %for subfigures
+\usepackage{verbatim} %useful for big comment chunks
+\usepackage{float} %More options for positioning floats(tables,images, etc..)
+\usepackage[a4paper,top = 2.5cm, bottom = 2.5cm, inner=2.5cm, 
+            outer=2.5cm]{geometry} % Use to adjust margins if needed
+%\usepackage{showframe}
+\usepackage{fancyhdr} %add headers and footers
+\usepackage{pdfpages} %to add title page as separate pdf file
+\usepackage{wrapfig} %package to wrap figure around text
+\usepackage{braket} %Package for Dirack Bra-Ket notation
+\usepackage{layout} %See page layout
+\usepackage{ragged2e} % to justify pieces of text
+\usepackage[sorting=none]{biblatex} %Bibliography package
+\usepackage{amsmath}
+\addbibresource{references.bib } %add references bib file
+
+
+
+
+%Couple commands to fix fancyhdr warning
+\setlength{\headheight}{14pt}
+\addtolength{\topmargin}{-1.6pt}
+
+%% SHORTCUT COMANDI DI MATEMATICA
+\newcommand{\LP}{\left}
+\newcommand{\RP}{\right}
+
+\title{Minerva Technologies Task}
+\author{Edoardo Bertoli\\bertoliedoardo99@gmail.com}
+
+
+
+
+
+
+%   BEGIN DOCUMENT  %
+\begin{document}
+
+
+%   Titolo interno    %
+\maketitle
+
+
+%Table of contents, list of figures, list of tables..
+\tableofcontents
+\thispagestyle{empty} 
+\clearpage
+
+
+%Pagestyle formatting
+\pagenumbering{arabic}
+
+
+%CHAPTERS%
+
+%\pagenumbering{arabic} %Start pagenumbering from here
+\section{Introduction}
+\label{intro}
+\input{introduction}
+
+\section{Data Cleaning}
+\label{datacleaning}
+\input{datacleaning}
+
+\section{Historical Data Analysis}
+\label{dataanalysis}
+\input{dataanalysis}
+
+\section{Linear Multi-Factor Model with PCA}
+\label{pca-apt}
+\input{pca-apt}
+
+\section{Model's Performance Analysis}
+\label{model-testing}
+\input{model-testing}
+
+\section{Portfolio Optimization}
+\label{optimization}
+\input{optimization}
+
+
+\clearpage
+\phantomsection
+\printbibliography
+
+
+
+\end{document}

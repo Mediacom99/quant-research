@@ -1,0 +1,33 @@
+\begin{enumerate}
+    \item risk-parity (uses only covariance matrix of forecasted returns
+    \item mean-variance (sucks)
+\end{enumerate}
+The most important thing is to handle correctly the risk!
+
+Rebalancing: train model, forecast, optimize, calculate weight, then change timeframe, retrain, forecast, optimize and calculate weight
+I think this is how you create a portfolio weight matrix.
+Then you can also simulate a real scenario, starting from data and given a certain frequency you update the data and remove the oldest timeframe data and repeat.
+VERY IMPORTANT TO CALCULATE STUFF ABOUT RISK AND PERFORMANCE OF PORTFOLIO:
+\begin{enumerate}
+    \item Sharp Ratio
+    \item Mean Squared Error
+    \item VaR
+    \item sVaR
+    \item ask claude
+    \item study optimal weights over time using rolling window rebalancing
+\end{enumerate}
+
+This is the idea:
+
+Divide dataset into some years of training (like 5) and 1 year of testing. Run the model and calculate weights. Make sure the relationship between returns and factors in the regression model is lagged like:
+\begin{equation}
+    y_t = bf_{t-1}
+\end{equation}
+Then test this model with a balancing frequency of one week: start with first weights from training data, calculate portfolio return in that week given actual prices. Use that week data to rerun the model, recalculate new weights fore the next week and repeat. Like this you can create a portfolio weight matrix of weeks and assets weights over the year of testing data. 
+
+Then I could do two approaches: use rolling window (shift training and testing sets by one year in the future and repeat calculation of new portfolio weight matrix) or I could use different year for the testing data to see how my model reacts to different markets (K-Fold Cross Validation is the way to do every possible combination).
+
+Anyway each time I calculate the weights I have to calculate stats for the portfolio such as returns and other stuff (Sharpe Ratio, VaR, SVaR and others)
+
+I could do the overall performance testing on the last year and maybe testing only on the periods of greater variance movement in order to see how the model performs under critical economic conditions. 
+There is alwyas K-Fold cross validation available.
