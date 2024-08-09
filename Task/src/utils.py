@@ -55,9 +55,8 @@ def normalize_dataframe(dataframe):
     """
     scaler = StandardScaler()
     df = dataframe.copy()
-    for cols_name, series in df.items():
-        df[cols_name] = pd.Series(scaler.fit_transform(series.values.reshape(-1,1)).flatten(), index=df.index);
-    
+    values = scaler.fit_transform(df)
+    df = pd.DataFrame(values, columns=df.columns, index=dataframe.index)
     return df
 
 #TODO Generalize date
@@ -86,6 +85,14 @@ def clean_cov_matrix(df, threshold):
     cov_matrix[mask] = 0
     
     return cov_matrix
+
+def force_diagonal_cov(df) -> pd.DataFrame:
+    
+    cov_matrix = df.cov()
+    
+    identity_matrix = np.eye(cov_matrix.shape[0])
+    
+    return cov_matrix * identity_matrix
 
 
 #Plot results of normality tests for 5 stocks in a single image

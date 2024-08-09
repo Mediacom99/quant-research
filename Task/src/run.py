@@ -1,9 +1,6 @@
-# Main file, only this file should be executed
-#TODO add some user input (just clean, do everythig, only train and so on)
+# Main file, only this file should be executed from the command line
 
-# OSL : -1.2259240622777985
-# Huber: broken
-# SDG regressor: -1.1186912582156785
+#TODO add some user input (just clean, do everythig, only train and so on)
 
 # Custom modules
 import eda

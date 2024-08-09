@@ -28,13 +28,11 @@ def optimize_get_weights(cov_matrix):
 
     initial_weights = np.ones(n_assets) / n_assets #Start with equal weights 
     # Optimization constraints (positive weights and full invested)
-    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1},
-                   {'type': 'ineq', 'fun': lambda x: x})
     
-    optimized_result = minimize(risk_parity_objective, initial_weights, args=(cov_matrix,), 
-                            method='SLSQP', constraints=constraints, options={'disp': True})
-
-    optimized_weights = optimized_result.x
-
-    return optimized_weights
+    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})  # Weights sum to 1
+    bounds = tuple((0, 1) for _ in range(n_assets))  # Weights between 0 and 1
+    
+    optimized_result = minimize(risk_parity_objective, initial_weights, args=(cov_matrix,),
+                      method='SLSQP', constraints=constraints, bounds=bounds)
+    return optimized_result.x
 
