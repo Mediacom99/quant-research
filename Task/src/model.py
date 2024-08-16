@@ -212,12 +212,13 @@ def run():
     
     
     start_date  = returns.index.min()
-    divide_date = start_date + pd.tseries.offsets.YearBegin(16)
+    divide_date = start_date + pd.tseries.offsets.BYearBegin(14)
     final_date  = returns.index.max()
+    #final_date = divide_date + pd.tseries.offsets.BYearBegin(10)
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
     
     #FIXME 1 BDay offset is broken, I find a portfolio total return greater than the bigger single stock return
-    offset = pd.tseries.offsets.BYearBegin(1)
+    offset = pd.tseries.offsets.BDay(5)
     
     # ROLLING WINDOW OF 1 WEEK
     temp_date = divide_date
