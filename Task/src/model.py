@@ -11,13 +11,13 @@ import utils
 from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression, HuberRegressor, SGDRegressor, ElasticNet, LassoLarsIC, TweedieRegressor
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression, HuberRegressor, SGDRegressor, ElasticNet, LassoLarsIC, TweedieRegressor, Ridge, TheilSenRegressor, PassiveAggressiveRegressor, RANSACRegressor
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import cross_val_score, TimeSeriesSplit
 from sklearn.multioutput import MultiOutputRegressor
 
 import eda 
+import optimize as op
 
 #Calculate PCA over given dataframe, returing the transformed data
 #It keeps enough PC to reach a certain variance passed as parameter (between 0 and 1)
@@ -43,11 +43,34 @@ def pca_transform_wrapper(factors:pd.DataFrame, n_components = 5, print_loadings
     
     return factor_df    
 
+# Actual PCA application for this particular case
+def pca_run(factor_training: {pd.DataFrame}, print_loadings = False) -> pd.DataFrame:
+    
+    #Dataframe for PCA on Macro and Fundamentals
+    pca_factors_macro_fund = pd.concat([factor_training['Macro indices'], factor_training['Fundamentals']], axis=1)
+    
+    #PCA run over only macro and fund
+    macro_fund_trans = pca_transform_wrapper(factors=pca_factors_macro_fund)
+    
+    # Dataframe containig all the factors onto which to perform the last PCA run. 
+    pca_factors_final = pd.concat([
+                            factor_training['Rates returns'],
+                            factor_training['Forex returns'],
+                            factor_training['Commodities returns'],
+                            macro_fund_trans], axis=1)
+
+    #Final PCA-Transformed factors
+    return pca_transform_wrapper(factors=pca_factors_final, print_loadings=print_loadings)    
+    
+    
+    
+
+
 #Linear regression of Y against X
 # Y -> stock returns
 # X -> pca-factors-lagged (1-d)
 # SGDRegressor(loss='huber', shuffle=False)
-def linear_regression_model_train(Y, X, model = SGDRegressor(loss='huber', shuffle=False), predict_data = pd.DataFrame()):
+def linear_regression_model_train(Y, X, model = LinearRegression(), x_for_predict = pd.DataFrame()):
      
     
     print(f"INFO: current selected module is: {model}")
@@ -67,103 +90,83 @@ def linear_regression_model_train(Y, X, model = SGDRegressor(loss='huber', shuff
                         columns=Y.columns, 
                         index=X.columns)
 
-
     #FIXME probably this one is wrong too
     intercepts = pd.DataFrame(intercepts, columns=['Intercepts'], index = Y.columns)
 
     
-    #Instance of timeSeriesSplit class
-    #res = cross_val_score(model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits = 5), error_score='raise', scoring=None)
-    # print("Array of scores of the estimator for each run in the cross validation")
-    # print(res)
-    #print("Cross validation score mean: ", res.mean())
+   
     
     y_pred = model.predict(X)
     residuals = (Y - y_pred)
-    print("Residuals mean:")
-    print(residuals.mean())
-    print("Residuals std:") 
-    print(residuals.std())
+    #print("Residuals mean:")
+    #print(residuals.mean())
+    #print("Residuals std:") 
+    #print(residuals.std())
     
-    if (predict_data.empty):
+    if (x_for_predict.empty):
         print("INFO: no predict_data provided. Forecasted data will be returned empty.")
-        forecast = []
+        return (residuals, coef_df, intercepts)
     else:
-        forecast = model.predict(predict_data)
+        forecast = model.predict(x_for_predict)
         forecast = pd.DataFrame(forecast, columns = Y.columns)
-    
-    # coef_df are the weights of the regression, forecast is the data forecasted using those weights given a dataframe of test data
-    return (residuals, coef_df, intercepts, forecast)
+        return (residuals, coef_df, intercepts, forecast)
 
-#####################################################################################################################################################################
 
-def model_train():
+def cross_validation_regressors(Y: pd.DataFrame, X: pd.DataFrame):
     
-    data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
+    #models = {LinearRegression(), HuberRegressor(), SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, epsilon=0.05), ElasticNet(), Ridge(), TweedieRegressor(), PassiveAggressiveRegressor(), TheilSenRegressor()}
     
-    ''' Normalizing factors for pca'''
-    for df in data:
-        if(df != 'Stock returns'):
-            data[df] = utils.normalize_dataframe(data[df])
+    models = [  
+                LinearRegression(),
+                PassiveAggressiveRegressor(),
+                ElasticNet(),
+                HuberRegressor(),
+                TweedieRegressor(),
+                SGDRegressor(shuffle=False),
+                SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False), 
+                SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, penalty='elasticnet', epsilon=0.0006590374037441118),
+    ]
     
-            
-    # Divide factors into training and testing datasets
+    for model in models:
+        multi_model = MultiOutputRegressor(model)  
+        res = cross_val_score(multi_model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits=5), error_score='raise', scoring='r2')
+        print(f"\tScore mean for {model}: {res.mean()}\n")
+        
+
+
+
+def model_train(training_data: {pd.DataFrame}):
+    '''
+    Perform PCA and factors, run linear regression model, calculate expected returns covariance matrix and call the optimization module's functions
+    to find the optimal portfolio weights
+    
+    Args:
+        training_data: a collection of pandas dataframes containing factors and returns onto which perform PCA and run the regression mode
+        
+    Returns:
+        The covariance matrix of forecasted returns
+    '''
+    
     factor_training = {}
-    factor_testing = {}
-    for df in data:
+    
+    returns_training = training_data['Stock returns']
+    
+    # Normalize ONLY the factors for PCA
+    for df in training_data:
         if(df != 'Stock returns'):
-            factor_training[df], factor_testing[df] = utils.divide_df_lastyear(data[df])
+            factor_training[df] = utils.normalize_dataframe(training_data[df])
     
+# -------------------- Principal Component Analysis --------------------------------------------------------------------------------------------------
     
-    returns_training, returns_testing = utils.divide_df_lastyear(data['Stock returns'])
-    returns_testing = np.exp(returns_testing) - 1 #Go back to simple percentage returns for better interpretability
+    #Apply PCA on Macro and Fundamentals first, then with the rest
+    final_pca_trans = pca_run(factor_training=factor_training, print_loadings=False)
     
-    
-    
-# -------------------- PCA --------------------------------------------------------------------------------------------------
-    
-    #Dataframe for PCA on Macro and Fundamentals
-    pca_factors_macro_fund = pd.concat([factor_training['Macro indices'], factor_training['Fundamentals']], axis=1)
-    
-    #Dataframe for PCA on Macro and Fundamentals for testing
-    pca_factors_macro_fund_test = pd.concat([factor_testing['Macro indices'], factor_testing['Fundamentals']], axis=1)
-    
-    
-    #PCA run over only macro and fund
-    macro_fund_trans = pca_transform_wrapper(factors=pca_factors_macro_fund)
-    
-    #PCA run over only macro and fund for testingn
-    macro_fund_trans_test = pca_transform_wrapper(factors=pca_factors_macro_fund_test)
-    
-    
-    # Dataframe containig all the factors onto which to perform the last PCA run. 
-    pca_factors_final = pd.concat([
-                            factor_training['Rates returns'],
-                            factor_training['Forex returns'],
-                            factor_training['Commodities returns'],
-                            macro_fund_trans], axis=1)
-    
-    # Dataframe containig all the factors on which to perform the last PCA run. (For testing) 
-    pca_factors_final_test = pd.concat([
-                            factor_testing['Rates returns'],
-                            factor_testing['Forex returns'],
-                            factor_testing['Commodities returns'],
-                            macro_fund_trans_test], axis=1)
-    
-    
-    #Final PCA-Transformed factors
-    final_pca_trans= pca_transform_wrapper(factors=pca_factors_final)
-    
-    #Final PCA-Transformed factors for testing
-    final_pca_trans_test = pca_transform_wrapper(factors=pca_factors_final_test)
-    
+# -------------------- Lag the factors --------------------------------------------------------------------------------------------------
     
     #Create lagged factors dataframe
     factors_lag = final_pca_trans.shift(periods=1, freq='B').dropna()
-    factors_lag_test = final_pca_trans_test.shift(periods=1, freq='B').dropna()
     # Remove the first row of returns and the last row of factors (because of the shift)
     factors_lag = factors_lag.drop(factors_lag.index[-1])
-    factors_lag_test = factors_lag_test.drop(factors_lag_test.index[-1])
     returns = returns_training.drop(returns_training.index[0])
 
 
@@ -172,59 +175,102 @@ def model_train():
     X = factors_lag
     Y = returns
     
-    residuals, weights, intercepts, forecast = linear_regression_model_train(Y, X, predict_data=factors_lag_test)
-
-    #Make sure the matrix (S) contains only residuals variances, only diagonal 
+    #print("Cross validation mean scores (higher is always better):\n")
+    #Cross validation of regressors:
+    #cross_validation_regressors(X,Y)
+    
+    #TODO FIGURE OUT THIS EPSILON
+    # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
+    epsilon = 0.001 * (Y.std().mean()) #Ignore differences smaller than 5% of the average between the std of the five stock idices.
+    print(f"Epsilon: {epsilon}")
+    
+    regression_model = SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, epsilon = epsilon)
+    
+    residuals, exposures, intercepts = linear_regression_model_train(Y, X, model = regression_model)
+        
+    #this matrix (S) contains only residuals variances, only diagonal 
     residuals_matrix = utils.force_diagonal_cov(residuals)
-
-    
-    
     
     # Covariance matrix of expected returns
-    final_cov = np.transpose(weights.values)@factors_lag.cov().values@weights.values + residuals_matrix.values #(RESIDULAS PART IS WRONG!)
+    cov_forecasted_returns = exposures.T @ X.cov() @ exposures + residuals_matrix
     
-    
-    
-#-------------------------- OPTIMIZATION ---------------------------------------------------------------------------
-    
-    import optimize as op
-    op_w = op.optimize_get_weights(final_cov)
-    print("Optimized weights:")
-    print(op_w)
-
-
-    daily_portfolio_returns = returns_testing@(op_w)
-    
-    portfolio_daily_cumulative = daily_portfolio_returns.cumsum()
-    
-    portfolio_std_daily = np.sqrt(op_w.T @ final_cov @ op_w)
-
-    portfolio_std_yearly = portfolio_std_daily * np.sqrt(daily_portfolio_returns.size)
-    
-    print(portfolio_daily_cumulative.tail())
-    print("Portfolio volatility (std): ", portfolio_std_yearly) #This gives me the correct result, but why multiply by sqrt(number of days) ?
-    print("Sharpe Ratio: ", portfolio_daily_cumulative.loc['2019-12-31'] / portfolio_std_yearly)
-    
-    #TODO I SHOULD PROBABLY CHECK THE CUMSUM OF EACH STOCK AND SEE IF IT MAKES SENSE TO HAVE THIS PORTFOLIO (OR JUST BUY THE FIRST STOCK)
-
-    #IMPLEMENT OPTIMIZATION
+    return cov_forecasted_returns
 
     
-    #TODO cross_val_score of all the linear models to see which one performs better
-    #TODO calculate forecasted variance matrix and compare with the one calculated using weights
-    #TODO once you have weekly data, perform optimization on the weekly data and check the portfolio
-    #TODO for each week I should also calcualte the RMSE for the model.
-    #TODO rebalance every week for the last year of data, for each week calculate what you need for the portfolio (return, variance, sharpe, var, svar)
-    #     (returns and variance are calculated using the true data)
+
+def run():
+    '''
+    This function is only called in run.py
+    '''
+    data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
     
-    #The idea is:
-    # 1. calculate weights for current week, calculate portfolio weights and use them in that week.
-    # 2. add that week to the training data and repeat
-    # 3. do this for the last year kept as training data
-    # 4. check how the portfolio performs in that week
-    # 5. Then I can create the portfolio weight matrix for each week in that year (as excel file would be nice)
     
-    #Maybe I can also do this in a monthly timeframe
+    # Division betweenn training and datasets is 
+    # done using a rolling window approach of 1 week
     
+    returns = data['Stock returns']
+    
+    
+    start_date  = returns.index.min()
+    divide_date = start_date + pd.tseries.offsets.YearBegin(16)
+    final_date  = returns.index.max()
+    result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
+    
+    
+    offset = pd.tseries.offsets.BDay(1)
+    
+    # ROLLING WINDOW OF 1 WEEK
+    temp_date = divide_date
+    while temp_date < final_date:
+        print("Offset start(test start): ", temp_date)
+        print("Testing end: ", temp_date + offset)
+        print("Training end: ", temp_date - pd.tseries.offsets.BusinessDay(1))
         
-    return
+        #Get data from correct time frame
+        returns_testing = data['Stock returns'].loc[temp_date:temp_date + offset]
+        training_data = utils.offset_dataframe_collection(data, start_date = start_date, end_date = temp_date)
+        
+        #Calculate covariance matrix of expected returns
+        cov_matrix_expected_returns = model_train(training_data=training_data)
+        
+        #Optimize the portfolio and check performance against testing dataset
+        res = op.optimize_portfolio(cov_matrix_expected_returns, returns_testing=returns_testing)
+        
+        #Append result to result dataframe
+        result.loc[temp_date] = [res['return'], res['lvar'], 0]
+        
+        #Go to next period
+        temp_date += offset
+        
+        print("\n")
+        
+    
+    
+    
+    #Dataframe with portfolio returns and variance for each rolling period
+    portfolio_simple_returns = result['Returns']
+    portfolio_log_var = result['Variance']
+    
+    #FIXME SHOULD THINK ABOUT THESE FORMULAS
+    
+    #portfolio_simple_return_mean = np.exp(portfolio_log_returns.mean()) - 1
+    
+    #Variance of distribution of simple(non log) portfolio returns over the rolling periods
+    #portfolio_simple_var_mean = portfolio_log_var.mean() * (np.exp(portfolio_simple_returns.mean() - 1))
+    
+    portfolio_return_simple_tot = portfolio_simple_returns.cumprod().iloc[portfolio_simple_returns.size - 1]
+    
+    #Standard deviation of the portfolio over the total testing period (error propagated from log returns)
+    #portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum() * np.exp(2*portfolio_log_returns.sum()))
+    
+    print("\n\n\n\n")
+    print("Portfolio average return over rolling period: ", portfolio_simple_returns.mean())
+    print("Portfolio average variance over rolling period: ", portfolio_log_var.mean())
+    print("Total portfolio return over testing period: ", portfolio_return_simple_tot)
+    print("Total portfolio volatility over testing period: ", portfolio_log_var.sum())
+    print("Sharpe Ratio over testing period: ", portfolio_return_simple_tot / portfolio_log_var.sum())
+    
+    #TODO SHOULD ADD COMPARISON WITH EACH STOCK INDEX RETURN AND VOLATILITY calc with real data
+
+def norm_value(df):
+    return np.exp(df) - 1

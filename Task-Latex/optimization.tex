@@ -31,3 +31,9 @@ Anyway each time I calculate the weights I have to calculate stats for the portf
 
 I could do the overall performance testing on the last year and maybe testing only on the periods of greater variance movement in order to see how the model performs under critical economic conditions. 
 There is alwyas K-Fold cross validation available.
+
+
+Propagazione degli errori di $f(x_1,\dots,x_N)$:
+\begin{equation}
+	\sigma_f = \sqrt{\sum_{i = 1}^{N}(\frac{\partial f}{\partial x_i}\sigma_{x_i})^2}
+\end{equation}

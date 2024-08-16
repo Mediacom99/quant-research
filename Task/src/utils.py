@@ -69,12 +69,19 @@ def divide_df_lastyear(df):
     Returns:
         (pd.DataFrame, pd.DataFrame): returns a tuple like (training DataFrame, testing DataFrame) 
     """
-    training = df[:'2018-12-31']
-    testing = df['2019-01-01':]
+    training = df.loc[:'2018-12-31']
+    testing = df.loc['2019-01-01':]
     return (training, testing)
 
+def offset_dataframe_collection(data, start_date, end_date):
+    offset_data = {}
+    for df in data:
+        offset_data[df] = data[df].loc[start_date:end_date]
+    return offset_data
+
+
 #Clean cov matrix by replacing extremely small values with zeroes
-def clean_cov_matrix(df, threshold):
+def clean_cov_matrix(df, threshold) -> pd.DataFrame:
     # Calculate the covariance matrix
     cov_matrix = df.cov()
     

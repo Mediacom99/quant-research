@@ -60,6 +60,7 @@ def correlation_analysis(df:pd.DataFrame):
 
 
 def plot_cum_returns(df):
+    
     # Set up the plot
     plt.figure(figsize=(15, 8))
     
@@ -68,7 +69,6 @@ def plot_cum_returns(df):
     for column in cum_returns.columns:
         plt.plot(cum_returns.index, cum_returns[column], label=column)
     
-        # Customize the plot
     plt.title('Cumulative Log Returns of Stocks Over Time')
     plt.xlabel('Date')
     plt.ylabel('Cumulative Log Returns')
@@ -85,10 +85,6 @@ def plot_cum_returns(df):
     plt.show()
 
 
-#TODO calculate kurtosis and skewness
-#TODO plot variance over different time periods (each week, each month and each year)
-#TODO visualize stock returns monthly over the whole timeframe
-#TODO LAG_PLOT FOR RANDOMNESS OF TIME SERIES
 def  eda_run():
 
     data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
@@ -102,8 +98,8 @@ def  eda_run():
         print("\tSkewness", series.skew()) 
         print("\tExcess kurtosis: ", series.kurtosis())
         print("\tAnderson-Darling:")
-        resad = normal_fit_test(series, 'ad')
-        print("\t\tP-value: ", resad.pvalue)
+        result_ad = normal_fit_test(series, 'ad')
+        print("\t\tP-value: ", result_ad.pvalue)
         
     utils.five_fig_plot(returns_norm)
     
@@ -114,6 +110,8 @@ def  eda_run():
     corr_matrix = correlation_analysis(stock_factors_df)
     print("Correlation matrix of the entire dataset:")
     print(corr_matrix)
+    
+    
     print("Stocks cumulative returns:")
     plot_cum_returns(data['Stock returns'])
     

@@ -17,4 +17,4 @@ pd.options.mode.copy_on_write = True
 #eda.eda_run()
 
 #Model training and weights calculation
-model.model_train()
+model.run()

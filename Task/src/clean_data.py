@@ -15,11 +15,11 @@ def fill_mean(data, window = '5D'):
     Forward and backword filling of zeros and NaN values. Apply rolling average
     only over the previously filled values.
     
-    Parameters:
+    Args:
     data : dataframe to clean
     window : time window to use for rolling average, default is 10 days (check pandas offset aliases)
     
-    Output: cleaned dataframe as a new dataframe
+    Returns: cleaned dataframe as a new dataframe
     This function does not change the passed dataframe 
     """
     
