@@ -216,12 +216,13 @@ def run():
     final_date  = returns.index.max()
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
     
-    
-    offset = pd.tseries.offsets.BDay(1)
+    #FIXME 1 BDay offset is broken, I find a portfolio total return greater than the bigger single stock return
+    offset = pd.tseries.offsets.BYearBegin(1)
     
     # ROLLING WINDOW OF 1 WEEK
     temp_date = divide_date
     while temp_date < final_date:
+        
         print("Offset start(test start): ", temp_date)
         print("Testing end: ", temp_date + offset)
         print("Training end: ", temp_date - pd.tseries.offsets.BusinessDay(1))
@@ -237,7 +238,7 @@ def run():
         res = op.optimize_portfolio(cov_matrix_expected_returns, returns_testing=returns_testing)
         
         #Append result to result dataframe
-        result.loc[temp_date] = [res['return'], res['lvar'], 0]
+        result.loc[temp_date] = [res['lreturn'], res['lvar'], 0]
         
         #Go to next period
         temp_date += offset
@@ -248,27 +249,19 @@ def run():
     
     
     #Dataframe with portfolio returns and variance for each rolling period
-    portfolio_simple_returns = result['Returns']
+    portfolio_log_returns = result['Returns']
     portfolio_log_var = result['Variance']
     
-    #FIXME SHOULD THINK ABOUT THESE FORMULAS
-    
-    #portfolio_simple_return_mean = np.exp(portfolio_log_returns.mean()) - 1
-    
-    #Variance of distribution of simple(non log) portfolio returns over the rolling periods
-    #portfolio_simple_var_mean = portfolio_log_var.mean() * (np.exp(portfolio_simple_returns.mean() - 1))
-    
-    portfolio_return_simple_tot = portfolio_simple_returns.cumprod().iloc[portfolio_simple_returns.size - 1]
+    portfolio_return_simple_tot = np.exp(portfolio_log_returns.sum()) - 1
     
     #Standard deviation of the portfolio over the total testing period (error propagated from log returns)
-    #portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum() * np.exp(2*portfolio_log_returns.sum()))
+    portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum())
     
     print("\n\n\n\n")
-    print("Portfolio average return over rolling period: ", portfolio_simple_returns.mean())
-    print("Portfolio average variance over rolling period: ", portfolio_log_var.mean())
     print("Total portfolio return over testing period: ", portfolio_return_simple_tot)
-    print("Total portfolio volatility over testing period: ", portfolio_log_var.sum())
-    print("Sharpe Ratio over testing period: ", portfolio_return_simple_tot / portfolio_log_var.sum())
+    print("Total portfolio volatility over testing period: ", portfolio_std_simple_tot)
+    print("Sharpe Ratio over testing period: ", portfolio_return_simple_tot / portfolio_std_simple_tot)
+    print("Singular stock simple total returns:\n", np.exp(returns[divide_date:final_date].sum()) - 1)
     
     #TODO SHOULD ADD COMPARISON WITH EACH STOCK INDEX RETURN AND VOLATILITY calc with real data
 
