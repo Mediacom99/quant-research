@@ -9,7 +9,7 @@ import model
 import pandas as pd
 import logging
 
-logging.basicConfig(level=logging.CRITICAL, filename='minerva-task.log', filemode='w+') # filemode = 'a' for appending to same file
+logging.basicConfig(level=logging.DEBUG, filename='minerva-task.log', filemode='w+') # filemode = 'a' for appending to same file
 
 
 #Pandas settings

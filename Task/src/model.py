@@ -219,28 +219,31 @@ def run():
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
     
     # The date I am using are probably wrong, I should check they work correctly
-    OFFSET = pd.tseries.offsets.BDay(1)
+    OFFSET = pd.tseries.offsets.BYearEnd(1)
+    ONEBDAY = pd.tseries.offsets.BDay(1)
     
     # ROLLING WINDOW OF 1 WEEK
     temp_date = divide_date
     while temp_date < final_date:
         
-        logger.debug("offset start(test start) is %s", {temp_date})
-        logger.debug("testing end is %s", {temp_date + OFFSET})
-        logger.debug("training end is %s ", {temp_date - pd.tseries.offsets.BDay(1)})
+        logger.warning("offset start(test start) is %s", {temp_date})
+        logger.warning("testing end is %s", {temp_date + OFFSET - ONEBDAY})
+        logger.warning("training end is %s ", {temp_date - ONEBDAY})
         
         #Get data from correct time frame
-        returns_testing = returns.loc[temp_date:temp_date + OFFSET]
+        returns_testing = returns.loc[temp_date:temp_date + OFFSET - ONEBDAY]
         training_data = utils.offset_dataframe_collection(data, start_date = start_date, end_date = temp_date)
         
         #Calculate covariance matrix of expected returns
         cov_matrix_expected_returns = model_train(training_data=training_data)
         
+        logger.critical("actual number of days: %s", {returns_testing['Indice Azionario Paese 1'].size})
+        
         #Optimize the portfolio and check performance against testing dataset
         res = op.optimize_portfolio(cov_matrix_expected_returns, returns_testing)
         
         returns_testing_simple_max = np.abs((np.exp(returns_testing.sum()) - 1)).max()
-        logger.critical("singular stock biggest simple total returns: %s\n\n", {returns_testing_simple_max})
+        logger.warning("singular stock biggest simple total returns: %s\n\n", {returns_testing_simple_max})
         
         if(returns_testing_simple_max < np.abs((np.exp(res['lreturn']) - 1)) ):
             logger.critical("PORTFOLIO RETURN IS BIGGER THAN BIGGEST SINGLE STOCK!!!")
