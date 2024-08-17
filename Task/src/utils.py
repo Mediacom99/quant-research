@@ -4,6 +4,10 @@ from numpy import abs
 from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
+import logging as log
+
+logger = log.getLogger('utils')
+
 
 #Reads sheets of excel file, set datetime format and 
 #date column as index. Returns collection of dataframes,
@@ -18,7 +22,7 @@ def get_data_from_excel(file_name):
         {sheet_name:pd.DataFrame,...}: returns a collection of pandas dataframe, each dataframe
                             corresponds to a sheet in the excel file.
     """
-    print("INFO: Loading data from excel file")
+    logger.info('loading data from excel file')
     #Get Formatted Data into 
     xls = pd.ExcelFile(file_name)
     sheet_names = xls.sheet_names
@@ -39,7 +43,7 @@ def count_nans(collection):
     
     for df in collection:
         for cols_name, series in collection[df].items():
-            print(f"Num of NaNs in {cols_name}: ", series.isna().sum())
+            logger.info("num of NaNs in %s: %s", {cols_name,series.isna().sum()})
     
     return
 
@@ -118,7 +122,7 @@ def five_fig_plot(df:pd.DataFrame):
         
         # Fit a normal distribution to the data
         mu, std = stats.norm.fit(data)
-        print(mu,std)
+        logger.info(mu,std)
         
         # Plot the histogram
         axs[i].hist(data, bins=250, density=True, alpha=0.7, color=colors[i])

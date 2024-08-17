@@ -6,18 +6,20 @@ using PCA on factors and a linear multi-factor model.
 
 """
 
-from matplotlib import pyplot as plt
+
 import utils
 from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression, HuberRegressor, SGDRegressor, ElasticNet, LassoLarsIC, TweedieRegressor, Ridge, TheilSenRegressor, PassiveAggressiveRegressor, RANSACRegressor
-from sklearn.svm import LinearSVC
 from sklearn.model_selection import cross_val_score, TimeSeriesSplit
 from sklearn.multioutput import MultiOutputRegressor
+import logging as log
 
-import eda 
 import optimize as op
+
+
+logger = log.getLogger('model')
 
 #Calculate PCA over given dataframe, returing the transformed data
 #It keeps enough PC to reach a certain variance passed as parameter (between 0 and 1)
@@ -36,8 +38,7 @@ def pca_transform_wrapper(factors:pd.DataFrame, n_components = 5, print_loadings
     index=feature_names
     )
     if(print_loadings):
-        print("Loadings:")
-        print(loadings)
+        logger.info("Loadings:\n%s", {loadings})
     
     factor_df = pd.DataFrame(factor_transformed, columns=[f'PC{i}' for i in range(n_components)], index=factors.index)
     
@@ -73,10 +74,10 @@ def pca_run(factor_training: {pd.DataFrame}, print_loadings = False) -> pd.DataF
 def linear_regression_model_train(Y, X, model = LinearRegression(), x_for_predict = pd.DataFrame()):
      
     
-    print(f"INFO: current selected module is: {model}")
+    logger.info("current selected module is: %s", {model})
     model = MultiOutputRegressor(model)
     
-    print(f"INFO: model {model} is calculating weights:")
+    logger.info("calculating weights")
     model.fit(X, Y)
     
     # Get coefficients and intercepts
@@ -104,7 +105,7 @@ def linear_regression_model_train(Y, X, model = LinearRegression(), x_for_predic
     #print(residuals.std())
     
     if (x_for_predict.empty):
-        print("INFO: no predict_data provided. Forecasted data will be returned empty.")
+        logger.info("no predict_data provided. Forecasted data will be returned empty.")
         return (residuals, coef_df, intercepts)
     else:
         forecast = model.predict(x_for_predict)
@@ -130,7 +131,7 @@ def cross_validation_regressors(Y: pd.DataFrame, X: pd.DataFrame):
     for model in models:
         multi_model = MultiOutputRegressor(model)  
         res = cross_val_score(multi_model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits=5), error_score='raise', scoring='r2')
-        print(f"\tScore mean for {model}: {res.mean()}\n")
+        logger.info("score mean for %s is %s", {model, res.mean() })
         
 
 
@@ -182,7 +183,7 @@ def model_train(training_data: {pd.DataFrame}):
     #TODO FIGURE OUT THIS EPSILON
     # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
     epsilon = 0.001 * (Y.std().mean()) #Ignore differences smaller than 5% of the average between the std of the five stock idices.
-    print(f"Epsilon: {epsilon}")
+    logger.info("Epsilon: %s", epsilon)
     
     regression_model = SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, epsilon = epsilon)
     
@@ -212,21 +213,21 @@ def run():
     
     
     start_date  = returns.index.min()
-    divide_date = start_date + pd.tseries.offsets.BYearEnd(14)
+    divide_date = start_date + pd.tseries.offsets.BYearEnd(16)
     final_date  = returns.index.max()
     #final_date = divide_date + pd.tseries.offsets.BYearBegin(10)
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
     
     # The date I am using are probably wrong, I should check they work correctly
-    OFFSET = pd.tseries.offsets.BYearEnd(1)
+    OFFSET = pd.tseries.offsets.BDay(1)
     
     # ROLLING WINDOW OF 1 WEEK
     temp_date = divide_date
     while temp_date < final_date:
         
-        print("Offset start(test start): ", temp_date)
-        print("Testing end: ", temp_date + OFFSET)
-        print("Training end: ", temp_date - pd.tseries.offsets.BDay(1))
+        logger.debug("offset start(test start) is %s", {temp_date})
+        logger.debug("testing end is %s", {temp_date + OFFSET})
+        logger.debug("training end is %s ", {temp_date - pd.tseries.offsets.BDay(1)})
         
         #Get data from correct time frame
         returns_testing = returns.loc[temp_date:temp_date + OFFSET]
@@ -239,10 +240,10 @@ def run():
         res = op.optimize_portfolio(cov_matrix_expected_returns, returns_testing)
         
         returns_testing_simple_max = np.abs((np.exp(returns_testing.sum()) - 1)).max()
-        print("Singular stock simple total returns:\n", returns_testing_simple_max)
+        logger.critical("singular stock biggest simple total returns: %s\n\n", {returns_testing_simple_max})
         
         if(returns_testing_simple_max < np.abs((np.exp(res['lreturn']) - 1)) ):
-            print("PORTFOLIO RETURN IS BIGGER THAN BIGGEST SINGLE STOCK!!!")
+            logger.critical("PORTFOLIO RETURN IS BIGGER THAN BIGGEST SINGLE STOCK!!!")
             exit(1)
         
         #Append result to result dataframe
@@ -250,8 +251,6 @@ def run():
         
         #Go to next period
         temp_date += OFFSET
-        
-        print("\n")
         
     
     
@@ -261,12 +260,10 @@ def run():
     portfolio_log_var = result['Variance']
     
     portfolio_return_simple_tot = np.exp(portfolio_log_returns.sum()) - 1
-    print(np.exp(portfolio_log_returns.cumsum()) - 1)
     
     #Standard deviation of the portfolio over the total testing period (error propagated from log returns)
     portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum())
     
-    print("\n\n\n\n")
     print("Total portfolio return over testing period: ", portfolio_return_simple_tot)
     print("Total portfolio volatility over testing period: ", portfolio_std_simple_tot)
     print("Sharpe Ratio over testing period: ", portfolio_return_simple_tot / portfolio_std_simple_tot)

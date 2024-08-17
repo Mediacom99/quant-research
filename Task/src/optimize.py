@@ -5,7 +5,9 @@ This module is dedicated to the optimization of the risk-parity objective functi
 import numpy as np
 from scipy.optimize import minimize
 import pandas as pd
-from matplotlib import pyplot as plt
+import logging as log
+
+logger = log.getLogger('optimize')
 
 # Weights = portfolio weights
 
@@ -47,8 +49,8 @@ def optimize_get_weights(cov_matrix):
 def optimize_portfolio(cov_forecasted_returns: pd.DataFrame, returns_testing: pd.DataFrame):
     
     op_w = optimize_get_weights(cov_forecasted_returns)
-    print("Optimized weights:")
-    print(op_w)
+    logger.info("Optimized weights:")
+    logger.info(op_w)
     
     returns_testing_simple = np.exp(returns_testing) - 1
     
@@ -58,7 +60,7 @@ def optimize_portfolio(cov_forecasted_returns: pd.DataFrame, returns_testing: pd
     
     daily_portfolio_returns_log = np.log(daily_portfolio_returns + 1)
     
-    print("Portfolio cumulative simple returns:", np.exp(daily_portfolio_returns_log.sum()) - 1)
+    logger.critical("portfolio cumulative simple returns: %s", {np.exp(daily_portfolio_returns_log.sum()) - 1})
         
     portfolio_var_from_daily = op_w.T @ cov_forecasted_returns @ op_w #Daily porfolio variance of the training dataset
     #Considering no covariance between trading days

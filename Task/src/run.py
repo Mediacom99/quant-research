@@ -7,6 +7,10 @@ import eda
 import clean_data
 import model
 import pandas as pd
+import logging
+
+logging.basicConfig(level=logging.CRITICAL, filename='minerva-task.log', filemode='w+') # filemode = 'a' for appending to same file
+
 
 #Pandas settings
 pd.options.mode.copy_on_write = True
@@ -16,5 +20,11 @@ pd.options.mode.copy_on_write = True
 
 #eda.eda_run()
 
+
+
 #Model training and weights calculation
 model.run()
+
+logging.log(logging.CRITICAL, "--------------------------------------------------------------------------------------------------------------------------------------\n\n")
+
+logging.shutdown()
