@@ -212,37 +212,44 @@ def run():
     
     
     start_date  = returns.index.min()
-    divide_date = start_date + pd.tseries.offsets.BYearBegin(14)
+    divide_date = start_date + pd.tseries.offsets.BYearEnd(14)
     final_date  = returns.index.max()
     #final_date = divide_date + pd.tseries.offsets.BYearBegin(10)
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
     
-    #FIXME 1 BDay offset is broken, I find a portfolio total return greater than the bigger single stock return
-    offset = pd.tseries.offsets.BDay(5)
+    # The date I am using are probably wrong, I should check they work correctly
+    OFFSET = pd.tseries.offsets.BYearEnd(1)
     
     # ROLLING WINDOW OF 1 WEEK
     temp_date = divide_date
     while temp_date < final_date:
         
         print("Offset start(test start): ", temp_date)
-        print("Testing end: ", temp_date + offset)
-        print("Training end: ", temp_date - pd.tseries.offsets.BusinessDay(1))
+        print("Testing end: ", temp_date + OFFSET)
+        print("Training end: ", temp_date - pd.tseries.offsets.BDay(1))
         
         #Get data from correct time frame
-        returns_testing = data['Stock returns'].loc[temp_date:temp_date + offset]
+        returns_testing = returns.loc[temp_date:temp_date + OFFSET]
         training_data = utils.offset_dataframe_collection(data, start_date = start_date, end_date = temp_date)
         
         #Calculate covariance matrix of expected returns
         cov_matrix_expected_returns = model_train(training_data=training_data)
         
         #Optimize the portfolio and check performance against testing dataset
-        res = op.optimize_portfolio(cov_matrix_expected_returns, returns_testing=returns_testing)
+        res = op.optimize_portfolio(cov_matrix_expected_returns, returns_testing)
+        
+        returns_testing_simple_max = np.abs((np.exp(returns_testing.sum()) - 1)).max()
+        print("Singular stock simple total returns:\n", returns_testing_simple_max)
+        
+        if(returns_testing_simple_max < np.abs((np.exp(res['lreturn']) - 1)) ):
+            print("PORTFOLIO RETURN IS BIGGER THAN BIGGEST SINGLE STOCK!!!")
+            exit(1)
         
         #Append result to result dataframe
         result.loc[temp_date] = [res['lreturn'], res['lvar'], 0]
         
         #Go to next period
-        temp_date += offset
+        temp_date += OFFSET
         
         print("\n")
         
@@ -254,6 +261,7 @@ def run():
     portfolio_log_var = result['Variance']
     
     portfolio_return_simple_tot = np.exp(portfolio_log_returns.sum()) - 1
+    print(np.exp(portfolio_log_returns.cumsum()) - 1)
     
     #Standard deviation of the portfolio over the total testing period (error propagated from log returns)
     portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum())
@@ -262,7 +270,7 @@ def run():
     print("Total portfolio return over testing period: ", portfolio_return_simple_tot)
     print("Total portfolio volatility over testing period: ", portfolio_std_simple_tot)
     print("Sharpe Ratio over testing period: ", portfolio_return_simple_tot / portfolio_std_simple_tot)
-    print("Singular stock simple total returns:\n", np.exp(returns[divide_date:final_date].sum()) - 1)
+    print("MAx single stock return over whole testing period:\n",(np.exp(returns.loc[divide_date:final_date].sum()) - 1).max())
     
     #TODO SHOULD ADD COMPARISON WITH EACH STOCK INDEX RETURN AND VOLATILITY calc with real data
 

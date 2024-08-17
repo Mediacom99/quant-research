@@ -54,9 +54,12 @@ def optimize_portfolio(cov_forecasted_returns: pd.DataFrame, returns_testing: pd
     
     # SIMPLE RETURNS COMBINE LINEARLY, LOG RETURNS DO NOT
     daily_portfolio_returns: pd.DataFrame = returns_testing_simple@(op_w)
+
     
     daily_portfolio_returns_log = np.log(daily_portfolio_returns + 1)
     
+    print("Portfolio cumulative simple returns:", np.exp(daily_portfolio_returns_log.sum()) - 1)
+        
     portfolio_var_from_daily = op_w.T @ cov_forecasted_returns @ op_w #Daily porfolio variance of the training dataset
     #Considering no covariance between trading days
     total_portfolio_var = portfolio_var_from_daily * daily_portfolio_returns.size #Portfolio variance by fixing weights over rolling window period
