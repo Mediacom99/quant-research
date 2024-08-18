@@ -1,14 +1,14 @@
 
 # Table of Contents
 
-1.  [Long-only trading portfolio across five equity indices](#org1c1ab6c)
-    1.  [Dataset](#orgcb67002)
-    2.  [Task requirements and evaluation](#org54dcd22)
-2.  [Python versions and dependencies:](#org1ed2822)
-3.  [Useful links, tips and notes:](#org055b8c4)
+1.  [Long-only trading portfolio across five equity indices](#org2819e85)
+    1.  [Dataset](#org3493fd8)
+    2.  [Task requirements and evaluation](#orge5f05d7)
+2.  [Python versions and dependencies:](#orgdcc63be)
+3.  [Useful links, tips and notes:](#org4febddf)
 
 
-<a id="org1c1ab6c"></a>
+<a id="org2819e85"></a>
 
 # Long-only trading portfolio across five equity indices
 
@@ -16,7 +16,7 @@ The exercise entails the development of a long-only trading model, the output of
 Each candidate will be provided with a dataset containing:
 
 
-<a id="orgcb67002"></a>
+<a id="org3493fd8"></a>
 
 ## Dataset
 
@@ -31,7 +31,7 @@ Each candidate will be provided with a dataset containing:
 The data is available in **data/data.xlsx**
 
 
-<a id="org54dcd22"></a>
+<a id="orge5f05d7"></a>
 
 ## Task requirements and evaluation
 
@@ -39,14 +39,12 @@ The in-sample period spans from September 30, 2003, to December 31, 2019.
 
 Out-of-sample results and the scientific rigor of the model will be the primary criteria for evaluation.
 
-Materials that enhance clarity, comprehensibility, and readability of the model will be highly regarded. This includes,
-but is not limited to, the formalization of the model using LaTeX or similar typesetting systems, detailed and clear code comments,
-and self-explanatory variable nomenclature to the greatest extent possible.
+Materials that enhance clarity, comprehensibility, and readability of the model will be highly regarded. This includes, but is not limited to, the formalization of the model using LaTeX or similar typesetting systems, detailed and clear code comments, and self-explanatory variable nomenclature to the greatest extent possible.
 
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 
-<a id="org1ed2822"></a>
+<a id="orgdcc63be"></a>
 
 # Python versions and dependencies:
 
@@ -59,7 +57,7 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: *python3.11* or *python3.12*
 
 
-<a id="org055b8c4"></a>
+<a id="org4febddf"></a>
 
 # Useful links, tips and notes:
 
