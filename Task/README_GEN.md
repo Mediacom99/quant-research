@@ -1,14 +1,14 @@
 
 # Table of Contents
 
-1.  [Long-only trading portfolio across five equity indices](#org0f91270)
-    1.  [Dataset](#org6d58acd)
-    2.  [Task requirement](#orgc561c0e)
-2.  [Python versions and dependencies:](#orge0a89f3)
-3.  [Useful links:](#orgec21172)
+1.  [Long-only trading portfolio across five equity indices](#org3b358c4)
+    1.  [Dataset](#org09bd6b1)
+    2.  [Task requirements and evaluation](#orga81b67f)
+2.  [Python versions and dependencies:](#org99d4ff0)
+3.  [Useful links, tips and notes:](#org47e1760)
 
 
-<a id="org0f91270"></a>
+<a id="org3b358c4"></a>
 
 # Long-only trading portfolio across five equity indices
 
@@ -16,7 +16,7 @@ The exercise entails the development of a long-only trading model, the output of
 Each candidate will be provided with a dataset containing:
 
 
-<a id="org6d58acd"></a>
+<a id="org09bd6b1"></a>
 
 ## Dataset
 
@@ -27,22 +27,23 @@ Each candidate will be provided with a dataset containing:
 -   Three historical series of daily logarithmic returns related to currency crosses.
 -   Three historical series of daily logarithmic returns related to commodities.
 -   The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
+    
+    The data is available in **data/data.xlsx**
 
 
-<a id="orgc561c0e"></a>
+<a id="orga81b67f"></a>
 
-## Task requirement
+## Task requirements and evaluation
 
 The in-sample period spans from September 30, 2003, to December 31, 2019.
-
 Out-of-sample results and the scientific rigor of the model will be the primary criteria for evaluation.
-
-Materials that enhance clarity, comprehensibility, and readability of the model will be highly regarded. This includes, but is not limited to, the formalization of the model using LaTeX or similar typesetting systems, detailed and clear code comments, and self-explanatory variable nomenclature to the greatest extent possible.
-
+Materials that enhance clarity, comprehensibility, and readability of the model will be highly regarded. This includes,
+but is not limited to, the formalization of the model using LaTeX or similar typesetting systems, detailed and clear code comments,
+and self-explanatory variable nomenclature to the greatest extent possible.
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 
-<a id="orge0a89f3"></a>
+<a id="org99d4ff0"></a>
 
 # Python versions and dependencies:
 
@@ -55,12 +56,12 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: *python3.11* or *python3.12*
 
 
-<a id="orgec21172"></a>
+<a id="org47e1760"></a>
 
-# Useful links:
+# Useful links, tips and notes:
 
-1.  install module: python3.10.exe -m pip install <module<sub>name</sub>>
-    <https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.pdf>
-2.  huge machine learning library: <https://scikit-learn.org/stable/>
-3.  or this one is good: <https://www.statsmodels.org/stable/index.html>
+1.  install python module on Windows: python3.11.exe -m pip install *module\\<sub>name</sub>*
+2.  <https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.pdf>
+3.  huge machine learning library: <https://scikit-learn.org/stable/>
+4.  this one is good too: <https://www.statsmodels.org/stable/index.html>
 
