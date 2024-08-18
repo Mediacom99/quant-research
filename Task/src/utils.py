@@ -43,7 +43,7 @@ def count_nans(collection):
     
     for df in collection:
         for cols_name, series in collection[df].items():
-            logger.info("num of NaNs in %s: %s", {cols_name,series.isna().sum()})
+            logger.info("num of NaNs in %s: %s", cols_name, series.isna().sum())
     
     return
 
@@ -122,7 +122,7 @@ def five_fig_plot(df:pd.DataFrame):
         
         # Fit a normal distribution to the data
         mu, std = stats.norm.fit(data)
-        logger.info(mu,std)
+        logger.info("mu: %s, std: %s", mu,std)
         
         # Plot the histogram
         axs[i].hist(data, bins=250, density=True, alpha=0.7, color=colors[i])

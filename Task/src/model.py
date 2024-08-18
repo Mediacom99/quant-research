@@ -7,6 +7,7 @@ using PCA on factors and a linear multi-factor model.
 """
 
 
+from matplotlib import pyplot as plt
 import utils
 from sklearn.decomposition import PCA
 import pandas as pd
@@ -38,7 +39,7 @@ def pca_transform_wrapper(factors:pd.DataFrame, n_components = 5, print_loadings
     index=feature_names
     )
     if(print_loadings):
-        logger.info("Loadings:\n%s", {loadings})
+        logger.info("Loadings:\n%s", loadings)
     
     factor_df = pd.DataFrame(factor_transformed, columns=[f'PC{i}' for i in range(n_components)], index=factors.index)
     
@@ -74,7 +75,7 @@ def pca_run(factor_training: {pd.DataFrame}, print_loadings = False) -> pd.DataF
 def linear_regression_model_train(Y, X, model = LinearRegression(), x_for_predict = pd.DataFrame()):
      
     
-    logger.info("current selected module is: %s", {model})
+    logger.info("current selected module is: %s", model)
     model = MultiOutputRegressor(model)
     
     logger.info("calculating weights")
@@ -131,7 +132,7 @@ def cross_validation_regressors(Y: pd.DataFrame, X: pd.DataFrame):
     for model in models:
         multi_model = MultiOutputRegressor(model)  
         res = cross_val_score(multi_model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits=5), error_score='raise', scoring='r2')
-        logger.info("score mean for %s is %s", {model, res.mean() })
+        logger.info("score mean for %s is %s", model, res.mean())
         
 
 
@@ -199,7 +200,7 @@ def model_train(training_data: {pd.DataFrame}):
 
     
 
-def run():
+def run(OFFSET = pd.tseries.offsets.BYearEnd(1), skip_years = 16):
     '''
     This function is only called in run.py
     '''
@@ -213,22 +214,21 @@ def run():
     
     
     start_date  = returns.index.min()
-    divide_date = start_date + pd.tseries.offsets.BYearEnd(16)
+    divide_date = start_date + pd.tseries.offsets.BYearEnd(skip_years)
     final_date  = returns.index.max()
     #final_date = divide_date + pd.tseries.offsets.BYearBegin(10)
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
     
     # The date I am using are probably wrong, I should check they work correctly
-    OFFSET = pd.tseries.offsets.BYearEnd(1)
     ONEBDAY = pd.tseries.offsets.BDay(1)
     
     # ROLLING WINDOW OF 1 WEEK
     temp_date = divide_date
     while temp_date < final_date:
         
-        logger.warning("offset start(test start) is %s", {temp_date})
-        logger.warning("testing end is %s", {temp_date + OFFSET - ONEBDAY})
-        logger.warning("training end is %s ", {temp_date - ONEBDAY})
+        logger.warning("offset start(test start) is %s", temp_date)
+        logger.warning("testing end is %s", temp_date + OFFSET - ONEBDAY)
+        logger.warning("training end is %s ", temp_date - ONEBDAY)
         
         #Get data from correct time frame
         returns_testing = returns.loc[temp_date:temp_date + OFFSET - ONEBDAY]
@@ -237,13 +237,13 @@ def run():
         #Calculate covariance matrix of expected returns
         cov_matrix_expected_returns = model_train(training_data=training_data)
         
-        logger.critical("actual number of days: %s", {returns_testing['Indice Azionario Paese 1'].size})
+        logger.critical("actual number of days: %s", returns_testing['Indice Azionario Paese 1'].size)
         
         #Optimize the portfolio and check performance against testing dataset
         res = op.optimize_portfolio(cov_matrix_expected_returns, returns_testing)
         
         returns_testing_simple_max = np.abs((np.exp(returns_testing.sum()) - 1)).max()
-        logger.warning("singular stock biggest simple total returns: %s\n\n", {returns_testing_simple_max})
+        logger.warning("singular stock biggest simple total returns (SHOULD ADD TOTAL VARIANCE): %s\n\n", returns_testing_simple_max)
         
         if(returns_testing_simple_max < np.abs((np.exp(res['lreturn']) - 1)) ):
             logger.critical("PORTFOLIO RETURN IS BIGGER THAN BIGGEST SINGLE STOCK!!!")
@@ -264,6 +264,23 @@ def run():
     
     portfolio_return_simple_tot = np.exp(portfolio_log_returns.sum()) - 1
     
+    df_portfolio_simple_returns = np.exp(portfolio_log_returns.cumsum()) - 1
+    
+    
+    #FIXME Plot stock cum returns against portfolio cum returns (Works only with daily upgrading)
+    returns_testing_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
+    df = pd.concat([df_portfolio_simple_returns, returns_testing_simple], axis=1)
+    print(df.tail())
+    series_to_highlight = 'Returns'
+    for column in df.columns:
+        if column != series_to_highlight:
+            plt.plot(df.index, df[column], label=column, alpha=0.5)
+    # Highlight specific series
+    plt.plot(df.index, df[series_to_highlight], linewidth=2, color='blue', label=f"{series_to_highlight} (highlighted)")
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+    
     #Standard deviation of the portfolio over the total testing period (error propagated from log returns)
     portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum())
     
@@ -271,8 +288,3 @@ def run():
     print("Total portfolio volatility over testing period: ", portfolio_std_simple_tot)
     print("Sharpe Ratio over testing period: ", portfolio_return_simple_tot / portfolio_std_simple_tot)
     print("MAx single stock return over whole testing period:\n",(np.exp(returns.loc[divide_date:final_date].sum()) - 1).max())
-    
-    #TODO SHOULD ADD COMPARISON WITH EACH STOCK INDEX RETURN AND VOLATILITY calc with real data
-
-def norm_value(df):
-    return np.exp(df) - 1
