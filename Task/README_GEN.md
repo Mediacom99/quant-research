@@ -1,14 +1,14 @@
 
 # Table of Contents
 
-1.  [Long-only trading portfolio across five equity indices](#org3b358c4)
-    1.  [Dataset](#org09bd6b1)
-    2.  [Task requirements and evaluation](#orga81b67f)
-2.  [Python versions and dependencies:](#org99d4ff0)
-3.  [Useful links, tips and notes:](#org47e1760)
+1.  [Long-only trading portfolio across five equity indices](#org5dc587b)
+    1.  [Dataset](#org15c40f4)
+    2.  [Task requirements and evaluation](#org4dd42d6)
+2.  [Python versions and dependencies:](#org5718242)
+3.  [Useful links, tips and notes:](#org0d969e5)
 
 
-<a id="org3b358c4"></a>
+<a id="org5dc587b"></a>
 
 # Long-only trading portfolio across five equity indices
 
@@ -16,7 +16,7 @@ The exercise entails the development of a long-only trading model, the output of
 Each candidate will be provided with a dataset containing:
 
 
-<a id="org09bd6b1"></a>
+<a id="org15c40f4"></a>
 
 ## Dataset
 
@@ -31,19 +31,22 @@ Each candidate will be provided with a dataset containing:
     The data is available in **data/data.xlsx**
 
 
-<a id="orga81b67f"></a>
+<a id="org4dd42d6"></a>
 
 ## Task requirements and evaluation
 
 The in-sample period spans from September 30, 2003, to December 31, 2019.
+
 Out-of-sample results and the scientific rigor of the model will be the primary criteria for evaluation.
+
 Materials that enhance clarity, comprehensibility, and readability of the model will be highly regarded. This includes,
 but is not limited to, the formalization of the model using LaTeX or similar typesetting systems, detailed and clear code comments,
 and self-explanatory variable nomenclature to the greatest extent possible.
+
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 
-<a id="org99d4ff0"></a>
+<a id="org5718242"></a>
 
 # Python versions and dependencies:
 
@@ -56,7 +59,7 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: *python3.11* or *python3.12*
 
 
-<a id="org47e1760"></a>
+<a id="org0d969e5"></a>
 
 # Useful links, tips and notes:
 
