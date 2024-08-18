@@ -1,15 +1,15 @@
 
 # Table of Contents
 
-1.  [Long-only trading portfolio across five equity indices](#org9d5b516)
-    1.  [Dataset](#org9972e05)
-    2.  [Task requirements and evaluation](#orgd08505d)
-2.  [Python versions and dependencies:](#org6b9d605)
-3.  [Code structure and how to use!](#orgb2ab51d)
-4.  [Useful links, tips and notes:](#orgdab3128)
+1.  [Long-only trading portfolio across five equity indices](#orgf9ec0fb)
+    1.  [Dataset](#org2161ddb)
+    2.  [Task requirements and evaluation](#org352a104)
+2.  [Python versions and dependencies:](#org4a66381)
+3.  [Code structure and how to use!](#org9513ead)
+4.  [Useful links, tips and notes:](#org9116143)
 
 
-<a id="org9d5b516"></a>
+<a id="orgf9ec0fb"></a>
 
 # Long-only trading portfolio across five equity indices
 
@@ -17,7 +17,7 @@ The exercise entails the development of a long-only trading model, the output of
 Each candidate will be provided with a dataset containing:
 
 
-<a id="org9972e05"></a>
+<a id="org2161ddb"></a>
 
 ## Dataset
 
@@ -32,7 +32,7 @@ Each candidate will be provided with a dataset containing:
 The data is available in **data/data.xlsx**
 
 
-<a id="orgd08505d"></a>
+<a id="org352a104"></a>
 
 ## Task requirements and evaluation
 
@@ -46,7 +46,7 @@ detailed and clear code comments, and self-explanatory variable nomenclature to 
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 
-<a id="org6b9d605"></a>
+<a id="org4a66381"></a>
 
 # Python versions and dependencies:
 
@@ -59,19 +59,19 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: *python3.11* or *python3.12*
 
 
-<a id="orgb2ab51d"></a>
+<a id="org9513ead"></a>
 
 # Code structure and how to use!
 
 Basically just run **run.py** and choose/uncomment out what you dont need.
 
 
-<a id="orgdab3128"></a>
+<a id="org9116143"></a>
 
 # Useful links, tips and notes:
 
 1.  install python module on Windows: python3.11.exe -m pip install *module<sub>name</sub>*
-2.  ciaooooo
+2.  Scikit-learn docs: <https://scikit-learn.org/stable/>
 3.  something: <https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3>.
 4.  huge machine learning library: <https://scikit-learn.org/stable/>
 5.  this one is good too: <https://www.statsmodels.org/stable/index.html>
