@@ -12,30 +12,38 @@ Each candidate will be provided with a dataset containing:
  - Three historical series of daily logarithmic returns related to commodities.
  - The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
 
-   The data is available in *data/data.xlsx*
+The data is available in *data/data.xlsx*
 
 ** Task requirements and evaluation
 The in-sample period spans from September 30, 2003, to December 31, 2019.
+
 Out-of-sample results and the scientific rigor of the model will be the primary criteria for evaluation.
-Materials that enhance clarity, comprehensibility, and readability of the model will be highly regarded. This includes,
-but is not limited to, the formalization of the model using LaTeX or similar typesetting systems, detailed and clear code comments,
-and self-explanatory variable nomenclature to the greatest extent possible.
+
+Materials that enhance clarity, comprehensibility, and readability of the model will be highly regarded.
+
+This includes, but is not limited to, the formalization of the model using LaTeX or similar typesetting systems,
+detailed and clear code comments, and self-explanatory variable nomenclature to the greatest extent possible.
+
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 * Python versions and dependencies:
 
-       1. pandas & openpyxl (main data management module using pandas.DataFrame)
-       2. matplotlib (for plotting stuff)
-       3. numpy (linear algebra calculations)
-       4. scipy (optimization algorithms)
-       5. scikit-learn (linear regression, PCA, model selection through scoring)
+       1. *pandas* & *openpyxl* (main data management module using pandas.DataFrame)
+       2. *matplotlib* (for plotting stuff)
+       3. *numpy* (linear algebra calculations)
+       4. *scipy* (optimization algorithms)
+       5. *scikit-learn* (linear regression, PCA, model selection through scoring)
 	  
 Python versions: /python3.11/ or /python3.12/
 
+* Code structure and how to use!
+
+Basically just run *run.py* and choose/uncomment out what you dont need.
 
 * Useful links, tips and notes:
 
-        1. install python module on Windows: python3.11.exe -m pip install /module\_name/
-	2. https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.pdf
-        3. huge machine learning library: https://scikit-learn.org/stable/
-        4. this one is good too: https://www.statsmodels.org/stable/index.html
+1. install python module on Windows: python3.11.exe -m pip install /module_name/
+2. Scikit-learn docs: https://scikit-learn.org/stable/
+3. something: https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.
+4. huge machine learning library: https://scikit-learn.org/stable/
+5. this one is good too: https://www.statsmodels.org/stable/index.html
