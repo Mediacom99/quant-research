@@ -1,14 +1,14 @@
 
 # Table of Contents
 
-1.  [Long-only trading portfolio across five equity indices](#org5dc587b)
-    1.  [Dataset](#org15c40f4)
-    2.  [Task requirements and evaluation](#org4dd42d6)
-2.  [Python versions and dependencies:](#org5718242)
-3.  [Useful links, tips and notes:](#org0d969e5)
+1.  [Long-only trading portfolio across five equity indices](#org1c1ab6c)
+    1.  [Dataset](#orgcb67002)
+    2.  [Task requirements and evaluation](#org54dcd22)
+2.  [Python versions and dependencies:](#org1ed2822)
+3.  [Useful links, tips and notes:](#org055b8c4)
 
 
-<a id="org5dc587b"></a>
+<a id="org1c1ab6c"></a>
 
 # Long-only trading portfolio across five equity indices
 
@@ -16,7 +16,7 @@ The exercise entails the development of a long-only trading model, the output of
 Each candidate will be provided with a dataset containing:
 
 
-<a id="org15c40f4"></a>
+<a id="orgcb67002"></a>
 
 ## Dataset
 
@@ -27,11 +27,11 @@ Each candidate will be provided with a dataset containing:
 -   Three historical series of daily logarithmic returns related to currency crosses.
 -   Three historical series of daily logarithmic returns related to commodities.
 -   The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
-    
-    The data is available in **data/data.xlsx**
+
+The data is available in **data/data.xlsx**
 
 
-<a id="org4dd42d6"></a>
+<a id="org54dcd22"></a>
 
 ## Task requirements and evaluation
 
@@ -46,7 +46,7 @@ and self-explanatory variable nomenclature to the greatest extent possible.
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 
-<a id="org5718242"></a>
+<a id="org1ed2822"></a>
 
 # Python versions and dependencies:
 
@@ -59,12 +59,12 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: *python3.11* or *python3.12*
 
 
-<a id="org0d969e5"></a>
+<a id="org055b8c4"></a>
 
 # Useful links, tips and notes:
 
-1.  install python module on Windows: python3.11.exe -m pip install *module\\<sub>name</sub>*
-2.  <https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.pdf>
+1.  install python module on Windows: python3.11.exe -m pip install *module-name*
+2.  something: <https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3>.
 3.  huge machine learning library: <https://scikit-learn.org/stable/>
 4.  this one is good too: <https://www.statsmodels.org/stable/index.html>
 
