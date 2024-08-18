@@ -3,13 +3,14 @@ The exercise entails the development of a long-only trading model, the output of
 Each candidate will be provided with a dataset containing:
 
 ** Dataset
-Five historical series of daily logarithmic returns pertaining to stock indices from five different geographic regions.
-Six historical series of Fundamental Indicators for each stock index.
-Two historical series of daily logarithmic returns related to interest rates for each geographic area.
-Two historical series of Macroeconomic Indicators for each geographic area.
-Three historical series of daily logarithmic returns related to currency crosses.
-Three historical series of daily logarithmic returns related to commodities.
-The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
+
+ - Five historical series of daily logarithmic returns pertaining to stock indices from five different geographic regions.
+ - Six historical series of Fundamental Indicators for each stock index.
+ - Two historical series of daily logarithmic returns related to interest rates for each geographic area.
+ - Two historical series of Macroeconomic Indicators for each geographic area.
+ - Three historical series of daily logarithmic returns related to currency crosses.
+ - Three historical series of daily logarithmic returns related to commodities.
+ - The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
 
 ** Task requirement
 The in-sample period spans from September 30, 2003, to December 31, 2019.

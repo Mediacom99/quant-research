@@ -1,14 +1,14 @@
 
 # Table of Contents
 
-1.  [Long-only trading portfolio across five equity indices](#org64ec5dd)
-    1.  [Dataset](#orgc27358c)
-    2.  [Task requirement](#org7cf4832)
-2.  [Python versions and dependencies:](#orgce61f33)
-3.  [Useful links:](#orgc9a0466)
+1.  [Long-only trading portfolio across five equity indices](#org0f91270)
+    1.  [Dataset](#org6d58acd)
+    2.  [Task requirement](#orgc561c0e)
+2.  [Python versions and dependencies:](#orge0a89f3)
+3.  [Useful links:](#orgec21172)
 
 
-<a id="org64ec5dd"></a>
+<a id="org0f91270"></a>
 
 # Long-only trading portfolio across five equity indices
 
@@ -16,20 +16,20 @@ The exercise entails the development of a long-only trading model, the output of
 Each candidate will be provided with a dataset containing:
 
 
-<a id="orgc27358c"></a>
+<a id="org6d58acd"></a>
 
 ## Dataset
 
-Five historical series of daily logarithmic returns pertaining to stock indices from five different geographic regions.
-Six historical series of Fundamental Indicators for each stock index.
-Two historical series of daily logarithmic returns related to interest rates for each geographic area.
-Two historical series of Macroeconomic Indicators for each geographic area.
-Three historical series of daily logarithmic returns related to currency crosses.
-Three historical series of daily logarithmic returns related to commodities.
-The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
+-   Five historical series of daily logarithmic returns pertaining to stock indices from five different geographic regions.
+-   Six historical series of Fundamental Indicators for each stock index.
+-   Two historical series of daily logarithmic returns related to interest rates for each geographic area.
+-   Two historical series of Macroeconomic Indicators for each geographic area.
+-   Three historical series of daily logarithmic returns related to currency crosses.
+-   Three historical series of daily logarithmic returns related to commodities.
+-   The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
 
 
-<a id="org7cf4832"></a>
+<a id="orgc561c0e"></a>
 
 ## Task requirement
 
@@ -42,7 +42,7 @@ Materials that enhance clarity, comprehensibility, and readability of the model 
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 
-<a id="orgce61f33"></a>
+<a id="orge0a89f3"></a>
 
 # Python versions and dependencies:
 
@@ -55,7 +55,7 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: *python3.11* or *python3.12*
 
 
-<a id="orgc9a0466"></a>
+<a id="orgec21172"></a>
 
 # Useful links:
 
