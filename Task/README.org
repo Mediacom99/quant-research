@@ -1,9 +1,8 @@
-* The exercise entails the development of a long-only trading model, the output of which will be a portfolio weight matrix across five equity indices.
-
-* TASK
-
+* Long-only trading portfolio across five equity indices
+The exercise entails the development of a long-only trading model, the output of which will be a portfolio weight matrix across five equity indices.
 Each candidate will be provided with a dataset containing:
 
+** Dataset
 Five historical series of daily logarithmic returns pertaining to stock indices from five different geographic regions.
 Six historical series of Fundamental Indicators for each stock index.
 Two historical series of daily logarithmic returns related to interest rates for each geographic area.
@@ -12,6 +11,7 @@ Three historical series of daily logarithmic returns related to currency crosses
 Three historical series of daily logarithmic returns related to commodities.
 The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
 
+** Task requirement
 The in-sample period spans from September 30, 2003, to December 31, 2019.
 
 Out-of-sample results and the scientific rigor of the model will be the primary criteria for evaluation.
@@ -20,7 +20,8 @@ Materials that enhance clarity, comprehensibility, and readability of the model 
  
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
-* Python modules required:
+* Python versions and dependencies:
+
        1. pandas & openpyxl (main data management module using pandas.DataFrame)
        2. matplotlib (for plotting stuff)
        3. numpy (linear algebra calculations)
@@ -30,7 +31,7 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: /python3.11/ or /python3.12/
 
 
-* COSE UTILI:
+* Useful links:
 
         1. install module: python3.10.exe -m pip install <module_name>
            https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.pdf

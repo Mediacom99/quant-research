@@ -1,22 +1,24 @@
 
 # Table of Contents
 
-1.  [The exercise entails the development of a long-only trading model, the output of which will be a portfolio weight matrix across five equity indices.](#org239b871)
-2.  [TASK](#org1451339)
-3.  [Python modules required:](#org91f9c74)
-4.  [COSE UTILI:](#org0263245)
+1.  [Long-only trading portfolio across five equity indices](#org64ec5dd)
+    1.  [Dataset](#orgc27358c)
+    2.  [Task requirement](#org7cf4832)
+2.  [Python versions and dependencies:](#orgce61f33)
+3.  [Useful links:](#orgc9a0466)
 
 
-<a id="org239b871"></a>
+<a id="org64ec5dd"></a>
 
-# The exercise entails the development of a long-only trading model, the output of which will be a portfolio weight matrix across five equity indices.
+# Long-only trading portfolio across five equity indices
 
-
-<a id="org1451339"></a>
-
-# TASK
-
+The exercise entails the development of a long-only trading model, the output of which will be a portfolio weight matrix across five equity indices.
 Each candidate will be provided with a dataset containing:
+
+
+<a id="orgc27358c"></a>
+
+## Dataset
 
 Five historical series of daily logarithmic returns pertaining to stock indices from five different geographic regions.
 Six historical series of Fundamental Indicators for each stock index.
@@ -25,6 +27,11 @@ Two historical series of Macroeconomic Indicators for each geographic area.
 Three historical series of daily logarithmic returns related to currency crosses.
 Three historical series of daily logarithmic returns related to commodities.
 The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
+
+
+<a id="org7cf4832"></a>
+
+## Task requirement
 
 The in-sample period spans from September 30, 2003, to December 31, 2019.
 
@@ -35,9 +42,9 @@ Materials that enhance clarity, comprehensibility, and readability of the model 
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 
-<a id="org91f9c74"></a>
+<a id="orgce61f33"></a>
 
-# Python modules required:
+# Python versions and dependencies:
 
 1.  pandas & openpyxl (main data management module using pandas.DataFrame)
 2.  matplotlib (for plotting stuff)
@@ -48,9 +55,9 @@ The model must be implemented using Python, and candidates may employ any librar
 Python versions: *python3.11* or *python3.12*
 
 
-<a id="org0263245"></a>
+<a id="orgc9a0466"></a>
 
-# COSE UTILI:
+# Useful links:
 
 1.  install module: python3.10.exe -m pip install <module<sub>name</sub>>
     <https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.pdf>
