@@ -5,7 +5,7 @@
     1.  [Dataset](#org7e77a7e)
     2.  [Task requirements and evaluation](#org5da516d)
 2.  [Python versions and dependencies:](#orge298c43)
-3.  [Code structure and how to use!](#org23aa0d2)
+3.  [Code structure and how to use](#org23aa0d2)
 4.  [Useful links, tips and notes:](#org7ddc4c0)
 
 
