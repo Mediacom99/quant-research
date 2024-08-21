@@ -5,7 +5,7 @@
     1.  [Dataset](#org7e77a7e)
     2.  [Task requirements and evaluation](#org5da516d)
 2.  [Python versions and dependencies:](#orge298c43)
-3.  [Code structure and how to use!](#org23aa0d2)
+3.  [Code structure and how to use](#org23aa0d2)
 4.  [Useful links, tips and notes:](#org7ddc4c0)
 
 
@@ -63,7 +63,7 @@ Python versions: *python3.11* or *python3.12*
 
 <a id="org23aa0d2"></a>
 
-# Code structure and how to use!
+# Code structure and how to use
 
 Basically just run **run.py** and choose/uncomment out what you dont need.
 
@@ -72,7 +72,7 @@ Basically just run **run.py** and choose/uncomment out what you dont need.
 
 # Useful links, tips and notes:
 
-1.  install python module on Windows: python3.11.exe -m pip install *module<sub>name</sub>*
+1.  install python module on Windows: python3.11.exe -m pip install *module-name*
 2.  Scikit-learn docs: <https://scikit-learn.org/stable/>
 3.  something: <https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3>.
 4.  huge machine learning library: <https://scikit-learn.org/stable/>
