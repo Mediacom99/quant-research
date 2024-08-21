@@ -1,13 +1,19 @@
-# This module takes raw data (from excel file) and formats it correctly in order to use it for further statistical purposes.
-# This module should be used once to clean the raw data, it will output an execl file containing all the cleaned data,
-# properly formatted into daily data.
-# The data is cleaned by replacing every 0 (zero) and NaN with a moving average at their original timeframe,
-# after that everything is reindexed into a daily timeframe.
-
+""" 
+ This module takes raw data (from the excel file data/data.xlsx) and cleans it for further statistical calculations.
+ This module should be used once to clean the raw data, it will output an execl file containing all the cleaned data,
+ properly formatted into daily data. This file is FormattedData/formatted-data.xlsx
+ The data is cleaned by replacing every 0 (zero) and NaN with a forward and backward fill.
+ Then a rolling average is applied only to the replaced data.
+ Everything that is not comprised of daily data is resampled into business days daily data using forward fill.
+ """
 from matplotlib import pyplot as plt
 import pandas as pd
 import utils 
 import numpy as np
+import logging 
+
+
+log = logging.getLogger('clean_data')
 
 
 def fill_mean(data, window = '5D'):
@@ -17,7 +23,7 @@ def fill_mean(data, window = '5D'):
     
     Args:
     data : dataframe to clean
-    window : time window to use for rolling average, default is 10 days (check pandas offset aliases)
+    window : time window to use for rolling average, default is 5 days (check pandas offset aliases)
     
     Returns: cleaned dataframe as a new dataframe
     This function does not change the passed dataframe 
@@ -37,7 +43,13 @@ def fill_mean(data, window = '5D'):
     return df
 
 def clean_data_run():
-    # Xls is the excel file with different sheets, each one will become a certain dataframe
+    """
+    Main function for this module. It is called once in the entry point run.py. 
+    It loads data from data.xlsx, cleans, resamples and check for residuals nans.
+    Writes a xlsx file containing every dataframe in a different sheet.
+    """
+    log.info("CLEAN_DATA.PY STARTING")
+    log.info("loading raw data.xlsx file...")
     data = utils.get_data_from_excel('./data/data.xlsx')
     
     #Log transformation of macro indices and fundamentals
@@ -45,13 +57,13 @@ def clean_data_run():
     data['Fondamentali Indici Azionari'] = utils.log_transform(data['Fondamentali Indici Azionari'])
     
     ## DATA CLEANING
-    print("INFO: cleaning dataframes...")
+    log.info("cleaning dataframes...")
     for df in data:
         data[df] = fill_mean(data[df]) 
 
 
     # Resampling monthly and quarterly data into daily data using forward fill    
-    print("INFO: starting resampling into daily timeframe...") 
+    log.info("starting resampling into daily timeframe...") 
     macro_daily = data['Macroeconomics'].resample('B').ffill()
     fund_daily = data['Fondamentali Indici Azionari'].resample('B').ffill()
     
@@ -66,7 +78,7 @@ def clean_data_run():
     commod  =   data['Commodities']
     
 
-    print("INFO: writing xlsx file...")
+    log.info("writing formatted-data xlsx file...")
     #Print each cleaned dataframe into its own sheet in the same excel file
     with pd.ExcelWriter('./FormattedData/formatted-data.xlsx') as writer:
         returns.to_excel(writer, sheet_name='Stock returns')
@@ -76,5 +88,5 @@ def clean_data_run():
         macro_daily.to_excel(writer, sheet_name='Macro indices')        
         fund_daily.to_excel(writer, sheet_name='Fundamentals')
     
-    print("Dataset cleaning finished successfully!")
+    log.info("dataset cleaned successfully!")
     return
