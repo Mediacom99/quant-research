@@ -32,22 +32,24 @@ import model
 import pandas as pd
 import logging
 
+#Logger configuration
 logging.basicConfig(level=logging.DEBUG, filename='minerva-task.log', filemode='w+') # filemode = 'a' for appending to same file
 
+print("Logs are saved in \"minerva-task.log\"")
 
 #Pandas settings
 pd.options.mode.copy_on_write = True
 
 # Clean data (this module cleans raw data)
-#clean_data.clean_data_run()
+# clean_data.clean_data_run()
 
-#eda.eda_run()
 
+# Exploratory data anlysis
+eda.eda_run()
 
 
 #Model training and weights calculation
-model.run(pd.tseries.offsets.BDay(1), skip_years=16)
+#model.run(pd.tseries.offsets.BDay(1), skip_years=16)
 
-logging.log(logging.CRITICAL, "--------------------------------------------------------------------------------------------------------------------------------------\n\n")
 
 logging.shutdown()

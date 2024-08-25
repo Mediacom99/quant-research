@@ -9,5 +9,5 @@
 \contentsline {subsection}{\numberline {4.1}Principal Component Analysis on Factors}{7}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Cross Validation of Linear Regressors}{7}{subsection.4.2}%
 \contentsline {subsection}{\numberline {4.3}Implementation}{7}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Model's Performance Analysis}{7}{section.5}%
-\contentsline {section}{\numberline {6}Portfolio Optimization}{7}{section.6}%
+\contentsline {section}{\numberline {5}Portfolio Optimization}{7}{section.5}%
+\contentsline {section}{\numberline {6}Model's Performance Analysis}{8}{section.6}%

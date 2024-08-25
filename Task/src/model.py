@@ -204,7 +204,11 @@ def run(OFFSET = pd.tseries.offsets.BYearEnd(1), skip_years = 16):
     '''
     This function is only called in run.py
     '''
-    data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
+
+    logger.info("MODEL.PY STARTING")
+
+    #FIXME the relative path works only if the python script is run in the Task folder
+    data = utils.get_data_from_excel("./FormattedData/formatted-data.xlsx")
     
     
     # Division betweenn training and datasets is 
