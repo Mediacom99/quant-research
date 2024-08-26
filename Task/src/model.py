@@ -200,7 +200,7 @@ def model_train(training_data: {pd.DataFrame}):
 
     
 
-def run(OFFSET = pd.tseries.offsets.BYearEnd(1), skip_years = 16):
+def run(OFFSET = pd.tseries.offsets.BYearEnd(1), divide_years = 16):
     '''
     This function is only called in run.py
     '''
@@ -218,7 +218,7 @@ def run(OFFSET = pd.tseries.offsets.BYearEnd(1), skip_years = 16):
     
     
     start_date  = returns.index.min()
-    divide_date = start_date + pd.tseries.offsets.BYearEnd(skip_years)
+    divide_date = start_date + pd.tseries.offsets.BYearEnd(divide_years)
     final_date  = returns.index.max()
     #final_date = divide_date + pd.tseries.offsets.BYearBegin(10)
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])

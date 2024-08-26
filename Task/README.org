@@ -33,6 +33,7 @@ The model must be implemented using Python, and candidates may employ any librar
        3. *numpy* (linear algebra calculations)
        4. *scipy* (optimization algorithms)
        5. *scikit-learn* (linear regression, PCA, model selection through scoring)
+       6. *seaborn*
 	  
 Python versions: /python3.11/ or /python3.12/
 

@@ -45,11 +45,12 @@ pd.options.mode.copy_on_write = True
 
 
 # Exploratory data anlysis
-eda.eda_run()
+# eda.eda_run()
 
 
 #Model training and weights calculation
-#model.run(pd.tseries.offsets.BDay(1), skip_years=16)
+model.run(pd.tseries.offsets.BMonthEnd(1), divide_years=10)
+
 
 
 logging.shutdown()
