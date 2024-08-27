@@ -181,10 +181,9 @@ def model_train(training_data: {pd.DataFrame}):
     #Cross validation of regressors:
     #cross_validation_regressors(X,Y)
     
-    #TODO FIGURE OUT THIS EPSILON
     # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
-    epsilon = 0.001 * (Y.std().mean()) #Ignore differences smaller than 5% of the average between the std of the five stock idices.
-    logger.info("Epsilon: %s", epsilon)
+    epsilon = 0.0001 * (Y.std().mean()) #Ignore differences smaller than 1/1000 of the average between the stds of the five stock indices.
+    logger.info("Epsilon (loss function threshold): %s", epsilon)
     
     regression_model = SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, epsilon = epsilon)
     
