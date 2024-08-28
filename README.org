@@ -37,12 +37,22 @@ The model must be implemented using Python, and candidates may employ any librar
 	  
 Python versions: /python3.11/ or /python3.12/
 
-* Code structure and how to use!
+* How to use
+#+BEGIN_SRC shell
+  git clone --depth=1 https://Mediacom99/quant-research.git
+#+END_SRC
+Install necessary python packages for the chosen version of python.
+#+BEGIN_SRC shell
+  cd src
+  python run.py
+#+END_SRC
+Then you can decide what function calls to comment/uncomment in run.py for cleaning the data,
+exploratory analysis or running the model and optimizing the portfolio.
 
-Basically just run *run.py* and choose/uncomment out what you dont need.
+* Code structure
+EXPLAIN CODE STRUCTURE
 
 * Useful links, tips and notes:
-
 + install python module on Windows: python3.11.exe -m pip install /module_name/
 + Scikit-learn docs: https://scikit-learn.org/stable/
 + something: https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.
@@ -63,3 +73,4 @@ Basically just run *run.py* and choose/uncomment out what you dont need.
   + [ ] eda.py [0/1]
     + [ ] check stock cumulative returns graph  
 	  
+      
