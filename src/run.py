@@ -55,10 +55,13 @@ formattedDatPath = '../formatted-data/formatted-data.xlsx'
 # Exploratory data anlysis
 # eda.eda_run(formattedDatPath, skipAndersonDarling=True)
 
-
 #Model training and weights calculation
-model.run(formattedDatPath, pd.tseries.offsets.BYearEnd(1), divide_years=16, print_pca_factor_loadings = True)
-
-
+model.run(
+          formattedDatPath,
+          pd.tseries.offsets.BDay(1),
+          divide_years=16,
+          print_pca_factor_loadings = False,
+          do_cross_validation = False
+          )
 
 logging.shutdown()

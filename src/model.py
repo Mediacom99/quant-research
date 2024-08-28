@@ -24,13 +24,13 @@ logger = log.getLogger('model')
 
 N_PCA_COMPONENTS = 5
 
-def pca_transform_wrapper(factors: pd.DataFrame, n_components = N_PCA_COMPONENTS, print_loadings: bool = False, cols_name_add = '') -> pd.DataFrame:
+def pca_transform_wrapper(factors: pd.DataFrame, print_loadings: bool, cols_name_add = '') -> pd.DataFrame:
     """
-    Calculates Principal Component Analysis over given dataframe, choosing the first n_components
+    Calculates Principal Component Analysis over given dataframe, choosing the first N_PCA_COMPONENTS
     
     Args:
     factors : DataFrame containing the data onto which to perform PCA
-    n_components: number of principal components to keep (columns of returned dataframe, rows is num of samples)
+    N_PCA_COMPONENTS: number of principal components to keep (columns of returned dataframe, rows is num of samples)
     print_loadings : wether or not to print factor loadings and do a bar plot
         
     Returns:
@@ -38,10 +38,10 @@ def pca_transform_wrapper(factors: pd.DataFrame, n_components = N_PCA_COMPONENTS
     """
         
     factors_names = factors.columns
-    pca = PCA(n_components=n_components)
+    pca = PCA(N_PCA_COMPONENTS)
     factor_transformed = pca.fit_transform(factors) #New factor_training dataset after PCA
 
-    cols = [f'{cols_name_add} PC{i}' for i in range(n_components)]
+    cols = [f'{cols_name_add} PC{i}' for i in range(N_PCA_COMPONENTS)]
 
     # loadings are the principal axes in the original factors space
     loadings = pd.DataFrame(
@@ -49,6 +49,7 @@ def pca_transform_wrapper(factors: pd.DataFrame, n_components = N_PCA_COMPONENTS
     columns=cols,
     index=factors_names
     )
+    
     if(print_loadings):
         print("Factor loadings:");
         print("Explained variance percentage:", pca.explained_variance_ratio_)
@@ -64,7 +65,7 @@ def pca_transform_wrapper(factors: pd.DataFrame, n_components = N_PCA_COMPONENTS
     return factor_df    
 
 
-def pca_run(factor_training: {pd.DataFrame}, print_loadings = False) -> pd.DataFrame:
+def pca_run(factor_training: {pd.DataFrame}, print_loadings: bool) -> pd.DataFrame:
     """
     Special application of pca_transform_wrapper for this particular dataset.
     It applies PCA first between macroeconomic indices and fundamentals. Then between
@@ -164,8 +165,8 @@ def cross_validation_regressors(Y: pd.DataFrame, X: pd.DataFrame):
                 ElasticNet(),
                 HuberRegressor(),
                 TweedieRegressor(),
-                SGDRegressor(shuffle=False),
-                SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False), 
+                SGDRegressor(loss='huber', shuffle=False),
+                SGDRegressor(loss='epsilon_insensitive', shuffle=False), 
                 SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, penalty='elasticnet', epsilon = 0.0001 * Y.std().mean() ),
     ]
     
@@ -177,7 +178,7 @@ def cross_validation_regressors(Y: pd.DataFrame, X: pd.DataFrame):
 
 
 
-def model_train(training_data: {pd.DataFrame}, print_pca_factor_loadings: bool = False):
+def model_train(training_data: {pd.DataFrame}, print_pca_factor_loadings: bool, do_cross_validation: bool):
     '''
     Perform PCA and factors, run linear regression model, calculate expected returns covariance matrix and call the optimization module's functions
     to find the optimal portfolio weights
@@ -216,15 +217,16 @@ def model_train(training_data: {pd.DataFrame}, print_pca_factor_loadings: bool =
 
     X = factors_lag
     Y = returns
-    
-    print("Cross validation mean scores (higher is always better):")
-    cross_validation_regressors(X,Y)
+
+    if(do_cross_validation):
+        print("Cross validation mean scores (higher is always better):")
+        cross_validation_regressors(X,Y)
     
     # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
     epsilon = 0.0001 * (Y.std().mean()) #Ignore differences smaller than 1/1000 of the average between the stds of the five stock indices.
     logger.info("Epsilon (loss function threshold): %s", epsilon)
     
-    regression_model = SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, epsilon = epsilon)
+    regression_model = SGDRegressor(loss='squared_epsilon_insensitive', penalty = 'elasticnet', shuffle=False, epsilon = epsilon)
     
     residuals, exposures, intercepts = linear_regression_model_train(Y, X, model = regression_model)
         
@@ -238,7 +240,7 @@ def model_train(training_data: {pd.DataFrame}, print_pca_factor_loadings: bool =
 
     
 
-def run(formattedDataPath: str, OFFSET: pd.tseries.offsets = pd.tseries.offsets.BYearEnd(1), divide_years = 16, print_pca_factor_loadings: bool = False):
+def run(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pca_factor_loadings: bool, do_cross_validation: bool, divide_years = 16):
     '''
     This function is only called in run.py
     '''
@@ -276,7 +278,7 @@ def run(formattedDataPath: str, OFFSET: pd.tseries.offsets = pd.tseries.offsets.
         training_data = utils.offset_dataframe_collection(data, start_date = start_date, end_date = temp_date)
         
         #Calculate covariance matrix of expected returns
-        cov_matrix_expected_returns = model_train(training_data=training_data, print_pca_factor_loadings=print_pca_factor_loadings)
+        cov_matrix_expected_returns = model_train(training_data=training_data, print_pca_factor_loadings=print_pca_factor_loadings, do_cross_validation=do_cross_validation)
         
         logger.critical("actual number of days: %s", returns_testing['Indice Azionario Paese 1'].size)
         
