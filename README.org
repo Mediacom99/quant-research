@@ -48,7 +48,8 @@ Basically just run *run.py* and choose/uncomment out what you dont need.
 3. something: https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.
 4. huge machine learning library: https://scikit-learn.org/stable/
 5. this one is good too: https://www.statsmodels.org/stable/index.html
-6. Description :: this is the description of a description.
+
+- Description :: this is the description of a description.
    
 
 # Ctrl-C Ctrl-C to toggle the checkboxes
