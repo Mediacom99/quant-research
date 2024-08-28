@@ -39,7 +39,7 @@ Python versions: /python3.11/ or /python3.12/
 
 * How to use
 #+BEGIN_SRC shell
-  git clone --depth=1 https://Mediacom99/quant-research.git
+  git clone --depth=1 https://github.com/Mediacom99/quant-research.git
 #+END_SRC
 Install necessary python packages for the chosen version of python.
 #+BEGIN_SRC shell
