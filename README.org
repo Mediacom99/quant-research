@@ -49,13 +49,17 @@ Basically just run *run.py* and choose/uncomment out what you dont need.
 4. huge machine learning library: https://scikit-learn.org/stable/
 5. this one is good too: https://www.statsmodels.org/stable/index.html
 
-* TODO Todo
-  + model.py [0/7]
-    + [-] fix structure linear_regression_model_train -> model_train -> run
-    + [-] check print statements and loggin statements
-    + [-] print portfolio weight matrix based on chosen timeperiod
-    + [-] histogram plot of residuals
-    + [-] check rolling window dates
-    + [-] check variable naming and comments
-    + [-] make func for plotting the portfolio and stocks return with highlight
-      + also fix resampling for timeframes other than daily
+# Ctrl-C Ctrl-C to toggle the checkboxes
+* TODO Todo [0%]
+  - [ ] model.py [0/7]
+    - [ ] fix structure linear_regression_model_train -> model_train -> run
+    - [ ] check print statements and loggin statements
+    - [ ] print portfolio weight matrix based on chosen timeperiod
+    - [ ] histogram plot of residuals
+    - [ ] check rolling window dates
+    - [ ] check variable naming and comments
+    - [ ] make func for plotting the portfolio and stocks return with highlight
+          also fix resampling for timeframes other than daily
+  - [ ] eda.py [0/1]
+    - [ ] check stock cumulative returns graph  
+	  
