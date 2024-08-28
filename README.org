@@ -12,7 +12,7 @@ Each candidate will be provided with a dataset containing:
  - Three historical series of daily logarithmic returns related to commodities.
  - The resulting portfolios should exclusively comprise a combination of weights of these five stock indices.
 
-The data is available in *data/data.xlsx*
+The data is available in *data/data.xlsx*.
 
 ** Task requirements and evaluation
 The in-sample period spans from September 30, 2003, to December 31, 2019.
@@ -27,7 +27,6 @@ detailed and clear code comments, and self-explanatory variable nomenclature to 
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
 * Python versions and dependencies:
-
        + *pandas* & *openpyxl* :: main data management module using pandas.DataFrame
        + *matplotlib* :: for plotting stuff
        + *numpy* :: linear algebra calculations
