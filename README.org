@@ -33,7 +33,7 @@ The model must be implemented using Python, and candidates may employ any librar
        + *numpy* :: linear algebra calculations
        + *scipy* :: optimization algorithms
        + *scikit-learn* :: linear regression, PCA, model selection through scoring
-       + *seaborn*
+       + *seaborn* :: for statistical visualization (heatmap)
 	  
 Python versions: /python3.11/ or /python3.12/
 
