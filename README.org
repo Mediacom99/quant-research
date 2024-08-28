@@ -41,7 +41,7 @@ Python versions: /python3.11/ or /python3.12/
 #+BEGIN_SRC shell
   git clone --depth=1 https://github.com/Mediacom99/quant-research.git
 #+END_SRC
-First install the necessary python packages for the chosen version of python (or use the shell.nix),
+First install the necessary python packages for the chosen version of python (or use shell.nix),
 then run the following commands
 #+BEGIN_SRC shell
   cd src
