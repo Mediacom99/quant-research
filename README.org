@@ -56,7 +56,7 @@ exploratory analysis or running the model and optimizing the portfolio.
 - optimize.py :: porfolio optimization using risk-parity
 - run.py :: entry point
 
-* Useful links, tips and notes:
+** Useful links, tips and notes:
 + install python module on Windows: python3.11.exe -m pip install /module_name/
 + Scikit-learn docs: https://scikit-learn.org/stable/
 + something: https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.
