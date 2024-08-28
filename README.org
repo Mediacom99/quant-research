@@ -57,9 +57,7 @@ exploratory analysis or running the model and optimizing the portfolio.
 - run.py :: entry point
 
 ** Report
-I have written a report in latex to explain the mathematics and process behind this trading model.
-
-You can find it [[https://github.com/Mediacom99/quant-research/blob/main/res-latex/main.pdf][here]].
+I have written a [[https://github.com/Mediacom99/quant-research/blob/main/res-latex/main.pdf][report]] in latex to explain the mathematics and process behind this trading model.
 
 ** Useful links, tips and notes:
 + install python module on Windows: python3.11.exe -m pip install /module_name/
