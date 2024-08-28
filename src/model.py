@@ -22,37 +22,65 @@ import optimize as op
 
 logger = log.getLogger('model')
 
-#Calculate PCA over given dataframe, returing the transformed data
-#It keeps enough PC to reach a certain variance passed as parameter (between 0 and 1)
-def pca_transform_wrapper(factors:pd.DataFrame, n_components = 5, print_loadings:bool = False):
+N_PCA_COMPONENTS = 5
+
+def pca_transform_wrapper(factors: pd.DataFrame, n_components = N_PCA_COMPONENTS, print_loadings: bool = False, cols_name_add = '') -> pd.DataFrame:
+    """
+    Calculates Principal Component Analysis over given dataframe, choosing the first n_components
     
-    feature_names = factors.columns
+    Args:
+    factors : DataFrame containing the data onto which to perform PCA
+    n_components: number of principal components to keep (columns of returned dataframe, rows is num of samples)
+    print_loadings : wether or not to print factor loadings and do a bar plot
+        
+    Returns:
+    dataframe containig the calculated principal components
+    """
+        
+    factors_names = factors.columns
     pca = PCA(n_components=n_components)
     factor_transformed = pca.fit_transform(factors) #New factor_training dataset after PCA
-    
-    #This dataframe, if made up of all the PC, is the inverse (or transpose since orthogonal) of the change of basis matrix
-    #between the original space and the space where the covariance matrix between factors is diagonal. Basically you can see
-    # how much each factors contributes to each PC.
+
+    cols = [f'{cols_name_add} PC{i}' for i in range(n_components)]
+
+    # loadings are the principal axes in the original factors space
     loadings = pd.DataFrame(
     pca.components_.T,
-    columns=[f'PC{i}' for i in range(n_components)],
-    index=feature_names
+    columns=cols,
+    index=factors_names
     )
     if(print_loadings):
-        logger.info("Loadings:\n%s", loadings)
+        print("Factor loadings:");
+        print("\n\nLoadings\n", loadings)
+        print("Explained variance percentage:", pca.explained_variance_ratio_)
+        print(f"Total explained variance percentage: {(pca.explained_variance_ratio_.sum()*100):.2f}%")
+        loadings.plot(kind='bar')
+        plt.show()
     
-    factor_df = pd.DataFrame(factor_transformed, columns=[f'PC{i}' for i in range(n_components)], index=factors.index)
+    factor_df = pd.DataFrame(factor_transformed, columns=cols, index=factors.index)
     
     return factor_df    
 
-# Actual PCA application for this particular case
+
 def pca_run(factor_training: {pd.DataFrame}, print_loadings = False) -> pd.DataFrame:
+    """
+    Special application of pca_transform_wrapper for this particular dataset.
+    It applies PCA first between macroeconomic indices and fundamentals. Then between
+    that result and the rest of the data. This last result's principal components
+    are returned.
+    
+    Args:
+    factor_training : portion of factors data chosen for training purposes (collection of dataframes)
+    print_loadings : wether or not to print factor loadings (see function pca_transform_wrapper)
+
+    Returns: PCA-transformed factors in a DataFrame
+    """
     
     #Dataframe for PCA on Macro and Fundamentals
     pca_factors_macro_fund = pd.concat([factor_training['Macro indices'], factor_training['Fundamentals']], axis=1)
     
-    #PCA run over only macro and fund
-    macro_fund_trans = pca_transform_wrapper(factors=pca_factors_macro_fund)
+    #PCA run over macro and fund only
+    macro_fund_trans = pca_transform_wrapper(factors=pca_factors_macro_fund, print_loadings=print_loadings, cols_name_add = 'Macro-Fund')
     
     # Dataframe containig all the factors onto which to perform the last PCA run. 
     pca_factors_final = pd.concat([
@@ -62,17 +90,22 @@ def pca_run(factor_training: {pd.DataFrame}, print_loadings = False) -> pd.DataF
                             macro_fund_trans], axis=1)
 
     #Final PCA-Transformed factors
-    return pca_transform_wrapper(factors=pca_factors_final, print_loadings=print_loadings)    
-    
-    
-    
+    final_pca_transformed = pca_transform_wrapper(factors=pca_factors_final, print_loadings=print_loadings, cols_name_add = 'Final')
+    return final_pca_transformed
 
 
-#Linear regression of Y against X
-# Y -> stock returns
-# X -> pca-factors-lagged (1-d)
-# SGDRegressor(loss='huber', shuffle=False)
 def linear_regression_model_train(Y, X, model = LinearRegression(), x_for_predict = pd.DataFrame()):
+    """
+    Performs the linear regression using either the default LinearRegression model or any valid model passed as input.
+
+    Args:
+    Y, X: datasets for regression of Y=Bx + C
+    model: regression model to use
+    x_for_predict: testing data to give the trained model to forecast some data
+
+    Returns:
+    (residuals, coef_df, intercepts, forecast) : residuals, calculated weights, calculated intercepts, forecasted data
+    """
      
     
     logger.info("current selected module is: %s", model)
@@ -86,20 +119,17 @@ def linear_regression_model_train(Y, X, model = LinearRegression(), x_for_predic
     intercepts = np.array([estimator.intercept_ for estimator in model.estimators_])
     
     
-    #FIXME THIS SHIT MIGHT BE WRONG, SHOULD BE (NUM_STOCKS, NUM_FACTORS)
     # Create a DataFrame of coefficients (factors exposures)
     coef_df = pd.DataFrame(coefficients.T, 
                         columns=Y.columns, 
                         index=X.columns)
 
-    #FIXME probably this one is wrong too
     intercepts = pd.DataFrame(intercepts, columns=['Intercepts'], index = Y.columns)
-
-    
-   
     
     y_pred = model.predict(X)
     residuals = (Y - y_pred)
+
+    #TODO HERE I CAN DO THINGS WITH RESIDUALS
     #print("Residuals mean:")
     #print(residuals.mean())
     #print("Residuals std:") 
@@ -115,8 +145,16 @@ def linear_regression_model_train(Y, X, model = LinearRegression(), x_for_predic
 
 
 def cross_validation_regressors(Y: pd.DataFrame, X: pd.DataFrame):
-    
-    #models = {LinearRegression(), HuberRegressor(), SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, epsilon=0.05), ElasticNet(), Ridge(), TweedieRegressor(), PassiveAggressiveRegressor(), TheilSenRegressor()}
+    """
+    Perform K-Fold Cross Validation using a TimeSeriesSPlit.
+    It divides data keeping track of temporal relations and performs
+    cross-validation of different models using for each their
+    own preferred scoring method. Each scoring method is
+    standardized so that higher value means better score.
+
+    Args:
+    Y, X data onto which to perform linear regression
+    """
     
     models = [  
                 LinearRegression(),
@@ -126,18 +164,18 @@ def cross_validation_regressors(Y: pd.DataFrame, X: pd.DataFrame):
                 TweedieRegressor(),
                 SGDRegressor(shuffle=False),
                 SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False), 
-                SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, penalty='elasticnet', epsilon=0.0006590374037441118),
+                SGDRegressor(loss='squared_epsilon_insensitive', shuffle=False, penalty='elasticnet', epsilon = 0.0001 * Y.std().mean() ),
     ]
     
     for model in models:
         multi_model = MultiOutputRegressor(model)  
         res = cross_val_score(multi_model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits=5), error_score='raise', scoring='r2')
-        logger.info("score mean for %s is %s", model, res.mean())
+        print(f"score mean for {model} is {res.mean()}")
         
 
 
 
-def model_train(training_data: {pd.DataFrame}):
+def model_train(training_data: {pd.DataFrame}, print_pca_factor_loadings: bool = False):
     '''
     Perform PCA and factors, run linear regression model, calculate expected returns covariance matrix and call the optimization module's functions
     to find the optimal portfolio weights
@@ -161,7 +199,7 @@ def model_train(training_data: {pd.DataFrame}):
 # -------------------- Principal Component Analysis --------------------------------------------------------------------------------------------------
     
     #Apply PCA on Macro and Fundamentals first, then with the rest
-    final_pca_trans = pca_run(factor_training=factor_training, print_loadings=False)
+    final_pca_trans = pca_run(factor_training=factor_training, print_loadings = print_pca_factor_loadings)
     
 # -------------------- Lag the factors --------------------------------------------------------------------------------------------------
     
@@ -177,9 +215,8 @@ def model_train(training_data: {pd.DataFrame}):
     X = factors_lag
     Y = returns
     
-    #print("Cross validation mean scores (higher is always better):\n")
-    #Cross validation of regressors:
-    #cross_validation_regressors(X,Y)
+    print("Cross validation mean scores (higher is always better):")
+    cross_validation_regressors(X,Y)
     
     # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
     epsilon = 0.0001 * (Y.std().mean()) #Ignore differences smaller than 1/1000 of the average between the stds of the five stock indices.
@@ -199,13 +236,13 @@ def model_train(training_data: {pd.DataFrame}):
 
     
 
-def run(formattedDataPath: str, OFFSET: pd.tseries.offsets = pd.tseries.offsets.BYearEnd(1), divide_years = 16):
+def run(formattedDataPath: str, OFFSET: pd.tseries.offsets = pd.tseries.offsets.BYearEnd(1), divide_years = 16, print_pca_factor_loadings: bool = False):
     '''
     This function is only called in run.py
     '''
 
     logger.info("MODEL.PY STARTING")
-
+    
     #FIXME the relative path works only if the python script is run in the Task folder
     data = utils.get_data_from_excel(formattedDataPath)
     
@@ -219,7 +256,6 @@ def run(formattedDataPath: str, OFFSET: pd.tseries.offsets = pd.tseries.offsets.
     start_date  = returns.index.min()
     divide_date = start_date + pd.tseries.offsets.BYearEnd(divide_years)
     final_date  = returns.index.max()
-    #final_date = divide_date + pd.tseries.offsets.BYearBegin(10)
     result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
     
     # The date I am using are probably wrong, I should check they work correctly
@@ -238,7 +274,7 @@ def run(formattedDataPath: str, OFFSET: pd.tseries.offsets = pd.tseries.offsets.
         training_data = utils.offset_dataframe_collection(data, start_date = start_date, end_date = temp_date)
         
         #Calculate covariance matrix of expected returns
-        cov_matrix_expected_returns = model_train(training_data=training_data)
+        cov_matrix_expected_returns = model_train(training_data=training_data, print_pca_factor_loadings=print_pca_factor_loadings)
         
         logger.critical("actual number of days: %s", returns_testing['Indice Azionario Paese 1'].size)
         

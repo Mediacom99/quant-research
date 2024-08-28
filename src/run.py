@@ -37,6 +37,7 @@ logging.basicConfig(level=logging.DEBUG, filename='minerva-task.log', filemode='
 
 print("Logs are saved in \"minerva-task.log\"")
 
+
 #Pandas settings
 pd.options.mode.copy_on_write = True
 
@@ -56,7 +57,7 @@ formattedDatPath = '../formatted-data/formatted-data.xlsx'
 
 
 #Model training and weights calculation
-model.run(formattedDatPath, pd.tseries.offsets.BDay(1), divide_years=16)
+model.run(formattedDatPath, pd.tseries.offsets.BYearEnd(1), divide_years=16, print_pca_factor_loadings = True)
 
 
 
