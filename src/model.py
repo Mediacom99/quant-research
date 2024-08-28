@@ -51,10 +51,12 @@ def pca_transform_wrapper(factors: pd.DataFrame, n_components = N_PCA_COMPONENTS
     )
     if(print_loadings):
         print("Factor loadings:");
-        print("\n\nLoadings\n", loadings)
         print("Explained variance percentage:", pca.explained_variance_ratio_)
         print(f"Total explained variance percentage: {(pca.explained_variance_ratio_.sum()*100):.2f}%")
         loadings.plot(kind='bar')
+        plt.tick_params(axis='both', which='major', labelsize=14)
+        plt.ylabel('Contribution (1 = 100%)', fontsize=16)
+        plt.title('Factors loadings contribution to principal components', fontsize=18)
         plt.show()
     
     factor_df = pd.DataFrame(factor_transformed, columns=cols, index=factors.index)
