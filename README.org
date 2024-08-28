@@ -26,7 +26,7 @@ detailed and clear code comments, and self-explanatory variable nomenclature to 
 
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
-* Python versions and dependencies:
+** Python versions and dependencies:
        + *pandas* & *openpyxl* :: main data management module using pandas.DataFrame
        + *matplotlib* :: for plotting stuff
        + *numpy* :: linear algebra calculations
@@ -36,7 +36,7 @@ The model must be implemented using Python, and candidates may employ any librar
 	  
 Python versions: /python3.11/ or /python3.12/
 
-* How to use
+** How to use
 #+BEGIN_SRC shell
   git clone --depth=1 https://github.com/Mediacom99/quant-research.git
 #+END_SRC
@@ -49,7 +49,7 @@ then run the following commands
 Then you can decide what function calls to comment/uncomment in run.py for cleaning the data,
 exploratory analysis or running the model and optimizing the portfolio.
 
-* Code structure
+** Code structure
 - clean_data.py :: cleaning the data
 - eda.py :: exploratory data analysis
 - model.py :: PCA and linear multifactor model
@@ -64,7 +64,7 @@ exploratory analysis or running the model and optimizing the portfolio.
 + this one is good too: https://www.statsmodels.org/stable/index.html
 
 # Ctrl-C Ctrl-C to toggle the checkboxes
-* TODO Todo [0%]
+** TODO Todo [0%]
   + [ ] model.py [0/7]
     + [ ] fix structure linear_regression_model_train -> model_train -> run
     + [ ] check print statements and loggin statements
