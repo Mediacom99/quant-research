@@ -26,7 +26,7 @@ detailed and clear code comments, and self-explanatory variable nomenclature to 
 
 The model must be implemented using Python, and candidates may employ any libraries or tools at their disposal.
 
-** Python versions and dependencies:
+** Python dependencies:
        + *pandas* & *openpyxl* :: main data management module using pandas.DataFrame
        + *matplotlib* :: for plotting stuff
        + *numpy* :: linear algebra calculations
