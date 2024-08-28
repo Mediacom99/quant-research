@@ -76,8 +76,21 @@ The following results have been calculated using the whole dataset apart from th
 In figure \ref{fig:factor-contribution-pca1} we can see the contribution of each Macroeconomic factor and Fundamentals factor to the first five principal components chosen. There are some peaks, suggesting that there are certain factors that prevail on the others but overall the distribution is pretty equal.
 In figure \ref{fig:factor-contribution-pca2} the situation is quite different: we can see that the first three final principal components are basically the same as the first three Macro and Fundamentals principal components; the last two final principal components are a combination of rates, commodities and forex.
 These final five principal components will be used in the next section as the input data to train the linear model.
+Table \ref{tab:pca-explained-variance} shows the percentage of the total variance of the factors explained by each principal component chosen, as well as the total explained variance of the first and second PCA run.
 
-TOTAL EXPLAINED VARIANCE
+\begin{table}[htb]
+	\centering
+	\resizebox{\textwidth}{!}{%
+		\begin{tabular}{|c|c|c|c|c|c|c|}
+			\hline
+			\textbf{}                           & \textbf{PC0} & \textbf{PC1} & \textbf{PC2} & \textbf{PC3} & \textbf{PC4} & \textbf{Total explained variance (\%)} \\ \hline
+			\textbf{Macro-Fundamental PCA (\%)} & 42.31        & 22.66        & 14.04        & 4.66         & 3.74         & 87.40                                  \\ \hline
+			\textbf{Final PCA (\%)}             & 33.23        & 17.79        & 11.02        & 5.58         & 4.53         & 72.15                                  \\ \hline
+		\end{tabular}%
+	}
+	\caption{Percentages of explained variance for each principal component and the total variance for the first and second PCA run}
+	\label{tab:pca-explained-variance}
+\end{table} 
 
 \begin{figure}[htb]
 	\centering
