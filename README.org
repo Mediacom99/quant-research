@@ -60,6 +60,6 @@ Basically just run *run.py* and choose/uncomment out what you dont need.
     + [ ] check variable naming and comments
     + [ ] make func for plotting the portfolio and stocks return with highlight
           also fix resampling for timeframes other than daily
-  + [ ] eda.py [0/1]
+  + [ ] eda.py [0/1] :: something
     + [ ] check stock cumulative returns graph  
 	  
