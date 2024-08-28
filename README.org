@@ -28,12 +28,12 @@ The model must be implemented using Python, and candidates may employ any librar
 
 * Python versions and dependencies:
 
-       1. *pandas* & *openpyxl* (main data management module using pandas.DataFrame)
-       2. *matplotlib* (for plotting stuff)
-       3. *numpy* (linear algebra calculations)
-       4. *scipy* (optimization algorithms)
-       5. *scikit-learn* (linear regression, PCA, model selection through scoring)
-       6. *seaborn*
+       + *pandas* & *openpyxl* :: main data management module using pandas.DataFrame
+       + *matplotlib* :: for plotting stuff
+       + *numpy* :: linear algebra calculations
+       + *scipy* :: optimization algorithms
+       + *scikit-learn* :: linear regression, PCA, model selection through scoring
+       + *seaborn*
 	  
 Python versions: /python3.11/ or /python3.12/
 
@@ -43,16 +43,11 @@ Basically just run *run.py* and choose/uncomment out what you dont need.
 
 * Useful links, tips and notes:
 
-1. install python module on Windows: python3.11.exe -m pip install /module_name/
-2. Scikit-learn docs: https://scikit-learn.org/stable/
-3. something: https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.
-4. huge machine learning library: https://scikit-learn.org/stable/
-5. this one is good too: https://www.statsmodels.org/stable/index.html
-
-
-- Description :: this is the description of a description.
-- Description2 :: asdaosdiasodiaiasodiaosdiaod
-- Description3 :: asdasdasdasdasdasdas 
++ install python module on Windows: python3.11.exe -m pip install /module_name/
++ Scikit-learn docs: https://scikit-learn.org/stable/
++ something: https://www.math.hkust.edu.hk/~makchen/MAFS5140/Chap3.
++ huge machine learning library: https://scikit-learn.org/stable/
++ this one is good too: https://www.statsmodels.org/stable/index.html
 
 # Ctrl-C Ctrl-C to toggle the checkboxes
 * TODO Todo [0%]
