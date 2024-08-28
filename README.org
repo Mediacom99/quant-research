@@ -65,7 +65,7 @@ exploratory analysis or running the model and optimizing the portfolio.
 
 # Ctrl-C Ctrl-C to toggle the checkboxes
 ** TODO Todo [0%]
-  + [ ] model.py [0/7]
+  + [ ] *model.py* [0/7]
     + [ ] fix structure linear_regression_model_train -> model_train -> run
     + [ ] check print statements and loggin statements
     + [ ] print portfolio weight matrix based on chosen timeperiod
@@ -74,7 +74,7 @@ exploratory analysis or running the model and optimizing the portfolio.
     + [ ] check variable naming and comments
     + [ ] make func for plotting the portfolio and stocks return with highlight
           also fix resampling for timeframes other than daily
-  + [ ] eda.py [0/1]
+  + [ ] *eda.py* [0/1]
     + [ ] check stock cumulative returns graph  
 	  
       
