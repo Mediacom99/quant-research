@@ -58,6 +58,7 @@ exploratory analysis or running the model and optimizing the portfolio.
 
 ** Report
 I have written a report in latex to explain the mathematics and process behind this trading model.
+
 You can find it [[https://github.com/Mediacom99/quant-research/blob/main/res-latex/main.pdf][here]].
 
 ** Useful links, tips and notes:
