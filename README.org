@@ -50,7 +50,11 @@ Then you can decide what function calls to comment/uncomment in run.py for clean
 exploratory analysis or running the model and optimizing the portfolio.
 
 * Code structure
-EXPLAIN CODE STRUCTURE
+- clean_data.py :: cleaning the data
+- eda.py :: exploratory data analysis
+- model.py :: PCA and linear multifactor model
+- optimize.py :: porfolio optimization using risk-parity
+- run.py :: entry point
 
 * Useful links, tips and notes:
 + install python module on Windows: python3.11.exe -m pip install /module_name/
