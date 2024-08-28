@@ -49,8 +49,8 @@ Basically just run *run.py* and choose/uncomment out what you dont need.
 4. huge machine learning library: https://scikit-learn.org/stable/
 5. this one is good too: https://www.statsmodels.org/stable/index.html
 
-* TODO Todo [0/7]
-  + model.py
+* TODO Todo
+  + model.py [0/7]
     + [-] fix structure linear_regression_model_train -> model_train -> run
     + [-] check print statements and loggin statements
     + [-] print portfolio weight matrix based on chosen timeperiod
