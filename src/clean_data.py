@@ -42,7 +42,7 @@ def fill_mean(data, window = '5D'):
                 
     return df
 
-def clean_data_run():
+def clean_data_run(rawDataPath: str, formattedDataPath: str):
     """
     Main function for this module. It is called once in the entry point run.py. 
     It loads data from data.xlsx, cleans, resamples and check for residuals nans.
@@ -50,7 +50,7 @@ def clean_data_run():
     """
     log.info("CLEAN_DATA.PY STARTING")
     log.info("loading raw data.xlsx file...")
-    data = utils.get_data_from_excel('./data/data.xlsx')
+    data = utils.get_data_from_excel(rawDataPath)
     
     #Log transformation of macro indices and fundamentals
     data['Macroeconomics'] = utils.log_transform(data['Macroeconomics'])
@@ -80,7 +80,7 @@ def clean_data_run():
 
     log.info("writing formatted-data xlsx file...")
     #Print each cleaned dataframe into its own sheet in the same excel file
-    with pd.ExcelWriter('./FormattedData/formatted-data.xlsx') as writer:
+    with pd.ExcelWriter(formattedDataPath) as writer:
         returns.to_excel(writer, sheet_name='Stock returns')
         rates.to_excel(writer, sheet_name='Rates returns')
         forex.to_excel(writer, sheet_name='Forex returns')

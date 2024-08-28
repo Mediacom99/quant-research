@@ -40,16 +40,23 @@ print("Logs are saved in \"minerva-task.log\"")
 #Pandas settings
 pd.options.mode.copy_on_write = True
 
-# Clean data (this module cleans raw data)
-# clean_data.clean_data_run()
+# Filepaths
 
+#Original raw data
+rawDataPath = '../raw-data/data.xlsx'
+
+#Cleaned and formatted data
+formattedDatPath = '../formatted-data/formatted-data.xlsx'
+
+# Clean data (this module cleans raw data)
+# clean_data.clean_data_run(rawDataPath, formattedDatPath)
 
 # Exploratory data anlysis
-# eda.eda_run()
+# eda.eda_run(formattedDatPath, skipAndersonDarling=True)
 
 
 #Model training and weights calculation
-model.run(pd.tseries.offsets.BDay(1), divide_years=16)
+model.run(formattedDatPath, pd.tseries.offsets.BDay(1), divide_years=16)
 
 
 

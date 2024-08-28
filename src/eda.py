@@ -85,9 +85,9 @@ def plot_cum_returns(df):
     plt.show()
 
 
-def  eda_run():
+def  eda_run(formattedDataPath: str, skipAndersonDarling: bool = False):
 
-    data = utils.get_data_from_excel('./FormattedData/formatted-data.xlsx')
+    data = utils.get_data_from_excel(formattedDataPath)
     returns_norm = utils.normalize_dataframe(data['Stock returns'])
     
     
@@ -97,9 +97,11 @@ def  eda_run():
         print("\tStd: ", series.std())
         print("\tSkewness", series.skew()) 
         print("\tExcess kurtosis: ", series.kurtosis())
-        print("\tAnderson-Darling:")
-        result_ad = normal_fit_test(series, 'ad')
-        print("\t\tP-value: ", result_ad.pvalue)
+        
+        if(skipAndersonDarling == False):
+            print("\tAnderson-Darling:")
+            result_ad = normal_fit_test(series, 'ad')
+            print("\t\tP-value: ", result_ad.pvalue)
         
     utils.five_fig_plot(returns_norm)
     

@@ -199,7 +199,7 @@ def model_train(training_data: {pd.DataFrame}):
 
     
 
-def run(OFFSET = pd.tseries.offsets.BYearEnd(1), divide_years = 16):
+def run(formattedDataPath: str, OFFSET: pd.tseries.offsets = pd.tseries.offsets.BYearEnd(1), divide_years = 16):
     '''
     This function is only called in run.py
     '''
@@ -207,7 +207,7 @@ def run(OFFSET = pd.tseries.offsets.BYearEnd(1), divide_years = 16):
     logger.info("MODEL.PY STARTING")
 
     #FIXME the relative path works only if the python script is run in the Task folder
-    data = utils.get_data_from_excel("./FormattedData/formatted-data.xlsx")
+    data = utils.get_data_from_excel(formattedDataPath)
     
     
     # Division betweenn training and datasets is 
