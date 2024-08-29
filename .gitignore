@@ -1,5 +1,6 @@
 #Custom ignores
 minerva-task.log
+src/__pycache__
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
