@@ -286,9 +286,9 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     # Rolling window loop
     while temp_date < final_date:
 
-        logger.warning("offset start(test start) is %s", temp_date)
-        logger.warning("testing end is %s", temp_date + OFFSET - ONEBDAY)
-        logger.warning("training end is %s ", temp_date - ONEBDAY)
+        logger.critical("offset start(test start) is %s", temp_date)
+        logger.critical("testing end is %s", temp_date + OFFSET - ONEBDAY)
+        logger.critical("training end is %s", temp_date - ONEBDAY)
 
         #Get data from correct time frame
         returns_testing = returns.loc[temp_date:temp_date + OFFSET - ONEBDAY]
@@ -297,7 +297,7 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
         #Calculate covariance matrix of expected returns
         cov_matrix_expected_returns = getCovMatrixFutureReturns(training_data=training_data, print_pca_factor_loadings=print_pca_factor_loadings, do_cross_validation=do_cross_validation)
 
-        logger.critical("Number of testing days: %s", returns_testing['Indice Azionario Paese 1'].size)
+        logger.critical("Number of testing days: %s\n", returns_testing['Indice Azionario Paese 1'].size)
 
         #Optimize the portfolio and check performance against testing dataset
         optimize_result = op.optimizePortfolioRun(cov_matrix_expected_returns, returns_testing)
@@ -320,7 +320,6 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
 
     portfolio_simple_total_cum_return = np.exp(portfolio_log_returns.sum()) - 1
     portfolio_simple_cum_returns = np.exp(portfolio_log_returns.cumsum()) - 1
-
 
     returns_testing_cum_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
     

@@ -8,9 +8,10 @@ import clean_data
 import model
 import pandas as pd
 import logging
+import pandas.tseries.offsets as ofs
 
 #Logger configuration
-logging.basicConfig(level=logging.DEBUG, filename='minerva-task.log', filemode='w+') # filemode = 'a' for appending to same file
+logging.basicConfig(level=logging.CRITICAL, filename='minerva-task.log', filemode='w+') # filemode = 'a' for appending to same file
 
 print("Logs are saved in \"minerva-task.log\"")
 
@@ -32,11 +33,19 @@ formattedDatPath = '../formatted-data/formatted-data.xlsx'
 # Exploratory data anlysis
 # eda.eda_run(formattedDatPath, skipAndersonDarling=True)
 
-#Model training and weights calculation
+# Run the trading model
+"""
+Valid OFFSET values:
+- X business years: ofs.BYearEnd(X)
+- X business months: ofs.BMonthEnd(X)
+- X business weeks: ofs.BDay(5 * X)
+- X business days: ofs.BDay(X)
+"""
+
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = pd.tseries.offsets.BYearEnd(1),
-          divide_years = 16,
+          OFFSET = ofs.BYearEnd(1),
+          divide_years = 3,
           print_pca_factor_loadings = False,
           do_cross_validation = False
           )
