@@ -36,7 +36,7 @@ formattedDatPath = '../formatted-data/formatted-data.xlsx'
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
           OFFSET = pd.tseries.offsets.BDay(1),
-          divide_years = 16,
+          divide_years = 10,
           print_pca_factor_loadings = False,
           do_cross_validation = False
           )

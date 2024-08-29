@@ -68,7 +68,7 @@ I have written a [[https://github.com/Mediacom99/quant-research/blob/main/res-la
 
 # Ctrl-C Ctrl-C to toggle the checkboxes
 ** TODO Todo [20%]
-  + [-] *model.py* [2/8]
+  + [-] *model.py* [2/9]
     + [X] fix structure linear_regression_model_train -> model_train -> run
     + [ ] check print statements and loggin statements
     + [ ] print portfolio weight matrix based on chosen timeperiod
@@ -79,6 +79,7 @@ I have written a [[https://github.com/Mediacom99/quant-research/blob/main/res-la
           also fix resampling for timeframes other than daily
     + [ ] add max and min variance of single stock over whole testing period
           so that it can be compared to the total portfolio variance
+    + [ ] add other portfolio benchmarks like VaR SVaR, RMSE
   + [-] *eda.py* [2/5]
     + [ ] check stock cumulative returns graph
     + [ ] check plotWeeklystd
@@ -90,6 +91,6 @@ I have written a [[https://github.com/Mediacom99/quant-research/blob/main/res-la
   + [-] *optimize.py* [1/2]
     + [X] check naming of funcs
     + [ ] add comments
-  + [ ] CHECK IMPORT STATEMENTS
+  + [ ] check import statements
 	  
       

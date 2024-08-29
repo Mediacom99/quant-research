@@ -318,21 +318,20 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     portfolio_log_returns = trading_model_result['Returns']
     portfolio_log_var = trading_model_result['Variance']
 
-    portfolio_return_simple_tot = np.exp(portfolio_log_returns.sum()) - 1
+    portfolio_simple_total_cum_return = np.exp(portfolio_log_returns.sum()) - 1
+    portfolio_simple_cum_returns = np.exp(portfolio_log_returns.cumsum()) - 1
 
-    df_portfolio_simple_returns = np.exp(portfolio_log_returns.cumsum()) - 1
 
-
-    returns_testing_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
+    returns_testing_cum_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
     
     #Standard deviation of the portfolio over the total testing period (error propagated from log returns)
     portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum())
 
-    print(f"Total portfolio return over testing period: {(portfolio_return_simple_tot*100):.2f}%")
+    print(f"Total portfolio return over testing period: {(portfolio_simple_total_cum_return*100):.2f}%")
     print(f"Total portfolio volatility over testing period: {(portfolio_std_simple_tot*100):.2f}%")
-    print(f"Sharpe Ratio over testing period: {portfolio_return_simple_tot / portfolio_std_simple_tot:.2f}")
+    print(f"Sharpe Ratio over testing period: {portfolio_simple_total_cum_return / portfolio_std_simple_tot:.2f}")
     print(f"Max single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).max()*100):.2f}%")
     print(f"Min single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
     #TODO print max and min variance
-    utils.graphPortfolioStocksPerformance(df_portfolio_simple_returns, returns_testing_simple)
+    utils.graphPortfolioStocksPerformance(portfolio_simple_cum_returns, returns_testing_cum_simple)
     return
