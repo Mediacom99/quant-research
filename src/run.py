@@ -35,8 +35,8 @@ formattedDatPath = '../formatted-data/formatted-data.xlsx'
 #Model training and weights calculation
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = pd.tseries.offsets.BDay(1),
-          divide_years = 10,
+          OFFSET = pd.tseries.offsets.BYearEnd(1),
+          divide_years = 16,
           print_pca_factor_loadings = False,
           do_cross_validation = False
           )
