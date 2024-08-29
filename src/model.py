@@ -132,7 +132,8 @@ def crossValidationRegressors(Y: pd.DataFrame, X: pd.DataFrame):
 
 def regressionModelRun(Y, X, model = LinearRegression(), x_for_predict = pd.DataFrame()):
     """
-    Performs the linear regression using either the default LinearRegression model or any valid model passed as input.
+    Performs linear regression using either the default LinearRegression regressor or any valid regressor
+    models passed as input.
 
     Args:
     Y, X: datasets for regression of Y=Bx + C
@@ -214,7 +215,10 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
 # -------------------- Principal Component Analysis --------------------------------------------------------------------------------------------------
 
     #Apply PCA on Macro and Fundamentals first, then with the rest
-    final_pca_trans = pcaSpecificRun(factor_training=factor_training, print_loadings = print_pca_factor_loadings)
+    final_pca_trans = pcaSpecificRun(
+        factor_training=factor_training,
+        print_loadings = print_pca_factor_loadings
+    )
 
 # -------------------- Lag the factors --------------------------------------------------------------------------------------------------
 
@@ -238,7 +242,12 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
     epsilon = 0.0001 * (Y.std().mean()) #Ignore differences smaller than 1/1000 of the average between the stds of the five stock indices.
     logger.info("Epsilon (loss function threshold): %s", epsilon)
 
-    regression_model = SGDRegressor(loss='squared_epsilon_insensitive', penalty = 'elasticnet', shuffle=False, epsilon = epsilon)
+    regression_model = SGDRegressor(
+        loss='squared_epsilon_insensitive',
+        penalty = 'elasticnet',
+        shuffle=False,
+        epsilon = epsilon
+    )
 
     residuals, exposures, intercepts = regressionModelRun(Y, X, model = regression_model)
 
@@ -274,63 +283,75 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
 
     #Load data from provided path
     data = utils.get_data_from_excel(formattedDataPath)
+
     returns = data['Stock returns']
+
     start_date  = returns.index.min()
     divide_date = start_date + pd.tseries.offsets.BYearEnd(divide_years)
     final_date  = returns.index.max()
     ONEBDAY = pd.tseries.offsets.BDay(1)
     temp_date = divide_date
 
-    trading_model_result = pd.DataFrame(columns=['Returns', 'Variance', 'Sharpe Ratio'])
+    trading_model_result = pd.DataFrame(columns=['Portfolio Returns', 'Portfolio Variance', 'Sharpe Ratio'])
 
     # Rolling window loop
     while temp_date < final_date:
-
-        logger.critical("offset start(test start) is %s", temp_date)
-        logger.critical("testing end is %s", temp_date + OFFSET - ONEBDAY)
-        logger.critical("training end is %s", temp_date - ONEBDAY)
-
-        #Get data from correct time frame
+        #Filter data given rolling window timeframe
         returns_testing = returns.loc[temp_date:temp_date + OFFSET - ONEBDAY]
-        training_data = utils.timeFilterDataframeCollection(data, start_date = start_date, end_date = temp_date)
+        training_data = utils.timeFilterDataframeCollection(
+            data,
+            start_date = start_date,
+            end_date = temp_date
+        )
 
         #Calculate covariance matrix of expected returns
-        cov_matrix_expected_returns = getCovMatrixFutureReturns(training_data=training_data, print_pca_factor_loadings=print_pca_factor_loadings, do_cross_validation=do_cross_validation)
-
-        logger.critical("Number of testing days: %s\n", returns_testing['Indice Azionario Paese 1'].size)
+        cov_matrix_expected_returns = getCovMatrixFutureReturns(
+            training_data=training_data,
+            print_pca_factor_loadings=print_pca_factor_loadings,
+            do_cross_validation=do_cross_validation
+        )
 
         #Optimize the portfolio and check performance against testing dataset
         optimize_result = op.optimizePortfolioRun(cov_matrix_expected_returns, returns_testing)
 
-        returns_testing_simple_max = np.abs((np.exp(returns_testing.sum()) - 1)).max()
-        logger.warning("singular stock biggest simple total returns (SHOULD ADD TOTAL VARIANCE): %s\n\n", returns_testing_simple_max)
-
         #Append result to final result dataframe
         trading_model_result.loc[temp_date] = [optimize_result['lreturn'], optimize_result['lvar'], 0]
 
-        #Go to next period
+        logger.warning("offset start(test start) is %s", temp_date)
+        logger.warning("testing end is %s", temp_date + OFFSET - ONEBDAY)
+        logger.warning("training end is %s", temp_date - ONEBDAY)
+        logger.warning("Number of testing days (size of ): %s\n",
+                       returns_testing['Indice Azionario Paese 1'].size)
+        _returns_testing_simple_max = np.abs((np.exp(returns_testing.sum()) - 1)).max()
+        logger.warning("singular stock biggest total cumulative return: %s\n\n",
+                       _returns_testing_simple_max)
+
+        #Roll window
         temp_date += OFFSET
 
 
+    portfolio_log_cum_returns = trading_model_result['Portfolio Returns']
+    portfolio_variance = trading_model_result['Portfolio Variance']
 
-
-    #Dataframe with portfolio returns and variance for each rolling period
-    portfolio_log_returns = trading_model_result['Returns']
-    portfolio_log_var = trading_model_result['Variance']
-
-    portfolio_simple_total_cum_return = np.exp(portfolio_log_returns.sum()) - 1
-    portfolio_simple_cum_returns = np.exp(portfolio_log_returns.cumsum()) - 1
+    portfolio_simple_cum_return_total = np.exp(portfolio_log_cum_returns.sum()) - 1
+    portfolio_simple_cum_returns = np.exp(portfolio_log_cum_returns.cumsum()) - 1
 
     returns_testing_cum_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
-    
-    #Standard deviation of the portfolio over the total testing period (error propagated from log returns)
-    portfolio_std_simple_tot = np.sqrt(portfolio_log_var.sum())
 
-    print(f"Total portfolio return over testing period: {(portfolio_simple_total_cum_return*100):.2f}%")
-    print(f"Total portfolio volatility over testing period: {(portfolio_std_simple_tot*100):.2f}%")
-    print(f"Sharpe Ratio over testing period: {portfolio_simple_total_cum_return / portfolio_std_simple_tot:.2f}")
+    #Standard deviation of the portfolio over the total testing period
+    portfolio_volatility = np.sqrt(portfolio_variance.sum())
+
+    print(f"Total portfolio return over testing period: {(portfolio_simple_cum_return_total*100):.2f}%")
+    print(f"Total portfolio volatility over testing period: {(portfolio_volatility*100):.2f}%")
+    print(f"Sharpe Ratio over testing period: {portfolio_simple_cum_return_total / portfolio_volatility:.2f}")
     print(f"Max single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).max()*100):.2f}%")
     print(f"Min single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
     #TODO print max and min variance
-    utils.graphPortfolioStocksPerformance(portfolio_simple_cum_returns, returns_testing_cum_simple)
+
+    #Here the two inputs might be in different timeframes (daily, monthly)
+    # it depends on the chosen rebalancing frequency
+    utils.graphPortfolioStocksPerformance(
+        portfolio_simple_cum_returns,
+        returns_testing_cum_simple
+    )
     return

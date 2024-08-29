@@ -44,8 +44,8 @@ Valid OFFSET values:
 
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = ofs.BYearEnd(1),
-          divide_years = 3,
+          OFFSET = ofs.BDay(1),
+          divide_years = 16,
           print_pca_factor_loadings = False,
           do_cross_validation = False
           )

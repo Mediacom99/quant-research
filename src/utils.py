@@ -208,7 +208,7 @@ def logTransform(df):
     return df_log
 
 # FIXME should add resampling other than daily
-def graphPortfolioStocksPerformance(df_portfolio_simple_returns, returns_testing_simple):
+def graphPortfolioStocksPerformance(portfolio_simple_returns, returns_testing_simple):
     """
     Graph cumulative returns of portfolio and each stock index, highlighting the portfolio curve.
 
@@ -220,14 +220,14 @@ def graphPortfolioStocksPerformance(df_portfolio_simple_returns, returns_testing
     nothing, prints graph interactively
     """
 
-    df = pd.concat([df_portfolio_simple_returns, returns_testing_simple], axis=1)
-    series_to_highlight = 'Returns'
+    df = pd.concat([portfolio_simple_returns, returns_testing_simple], axis=1)
+    series_to_highlight = portfolio_simple_returns.name
     for column in df.columns:
         if column != series_to_highlight:
             plt.plot(df.index, df[column], label=column, alpha=0.5)
             
     # Highlight specific series
-    plt.plot(df.index, df[series_to_highlight], linewidth=2, color='blue', label=f"{series_to_highlight} (highlighted)")
+    plt.plot(df.index, df[series_to_highlight], linewidth=2, color='blue', label=f"{series_to_highlight}")
     plt.legend(loc='best')
     plt.tight_layout()
     plt.show()
