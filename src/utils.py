@@ -233,3 +233,17 @@ def graphPortfolioStocksPerformance(portfolio_simple_returns, returns_testing_si
     plt.show()
     return
 
+def graphPortfolioWeights(portfolio_matrix):
+    """
+    Print portfolio optimized weights over time graph
+    """
+    portfolio_matrix.plot()
+    plt.title("Optimized weights over time", fontsize=22)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.legend(loc='best')
+    plt.grid()
+    plt.tight_layout()
+    plt.show()
+    return
+

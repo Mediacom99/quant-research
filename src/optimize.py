@@ -62,7 +62,7 @@ def optimizePortfolioRun(cov_expected_returns: pd.DataFrame, returns_testing: pd
 
     op_w = optimizationRun(cov_expected_returns)
     logger.info("Optimized weights:")
-    logger.info(op_w)
+    print(op_w)
 
     returns_testing_simple = np.exp(returns_testing) - 1
 
@@ -84,4 +84,5 @@ def optimizePortfolioRun(cov_expected_returns: pd.DataFrame, returns_testing: pd
     return {
         'lreturn' : tf_portfolio_returns_log.sum(),
         'lvar' : total_portfolio_var_over_tf,
+        'weights' : op_w 
     }

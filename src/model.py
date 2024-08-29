@@ -292,7 +292,13 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     ONEBDAY = pd.tseries.offsets.BDay(1)
     temp_date = divide_date
 
-    trading_model_result = pd.DataFrame(columns=['Portfolio Returns', 'Portfolio Variance', 'Sharpe Ratio'])
+    trading_model_result = pd.DataFrame(
+        columns=['Portfolio Returns', 'Portfolio Variance', 'Sharpe Ratio']
+    )
+    
+    portfolio_matrix = pd.DataFrame(
+        columns = returns.columns,
+    )
 
     # Rolling window loop
     while temp_date < final_date:
@@ -317,6 +323,9 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
         #Append result to final result dataframe
         trading_model_result.loc[temp_date] = [optimize_result['lreturn'], optimize_result['lvar'], 0]
 
+        #Append weights to portfolio matrix
+        portfolio_matrix.loc[temp_date] = optimize_result['weights']
+        
         logger.warning("offset start(test start) is %s", temp_date)
         logger.warning("testing end is %s", temp_date + OFFSET - ONEBDAY)
         logger.warning("training end is %s", temp_date - ONEBDAY)
@@ -354,4 +363,7 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
         portfolio_simple_cum_returns,
         returns_testing_cum_simple
     )
+
+    portfolio_matrix.to_excel("../portfolio-matrices/portfolio-matrixBDay1.xlsx")
+    utils.graphPortfolioWeights(portfolio_matrix)
     return
