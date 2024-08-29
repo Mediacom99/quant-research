@@ -63,29 +63,53 @@ def normalize_dataframe(dataframe):
     df = pd.DataFrame(values, columns=df.columns, index=dataframe.index)
     return df
 
-#TODO Generalize date
-def divide_df_lastyear(df):
-    """Divide dataframe into two dataframes, cutting the original one at a certain date
+# #TODO Generalize date
+# def divide_df_lastyear(df):
+#     """Divide dataframe into two dataframes, cutting the original one at a certain date
+
+#     Args:
+#         dataframe (pd.DataFrame): original dataframe to cut
+
+#     Returns:
+#         (pd.DataFrame, pd.DataFrame): returns a tuple like (training DataFrame, testing DataFrame) 
+#     """
+#     training = df.loc[:'2018-12-31']
+#     testing = df.loc['2019-01-01':]
+#     return (training, testing)
+
+
+def timeFilterDataframeCollection(data, start_date, end_date) -> pd.DataFrame:
+    """
+    Filter the date-indexed (datetime format) collection of dataframes
+    given a starting date and end_date
 
     Args:
-        dataframe (pd.DataFrame): original dataframe to cut
+    data: collection of dataframes to time filter
+    start/end_date: start and end date in pandas format for filtering
 
     Returns:
-        (pd.DataFrame, pd.DataFrame): returns a tuple like (training DataFrame, testing DataFrame) 
+    time filtered dataframe
     """
-    training = df.loc[:'2018-12-31']
-    testing = df.loc['2019-01-01':]
-    return (training, testing)
-
-def offset_dataframe_collection(data, start_date, end_date):
+    
     offset_data = {}
     for df in data:
         offset_data[df] = data[df].loc[start_date:end_date]
     return offset_data
 
 
-#Clean cov matrix by replacing extremely small values with zeroes
-def clean_cov_matrix(df, threshold) -> pd.DataFrame:
+
+def cleanMatrixSmall(df, threshold) -> pd.DataFrame:
+    """
+    Clean matrix by replacing with zero any value
+    smaller than threhshold.
+
+    Args:
+    df: dataframe to clean
+    threshold: if number is small than this arg than replace with zero
+
+    Returns:
+    cleaned dataframe
+    """
     # Calculate the covariance matrix
     cov_matrix = df.cov()
     
@@ -97,8 +121,16 @@ def clean_cov_matrix(df, threshold) -> pd.DataFrame:
     
     return cov_matrix
 
-def force_diagonal_cov(df) -> pd.DataFrame:
-    
+def forceDiagonalCov(df) -> pd.DataFrame:
+    """
+    force the matrix passed as dataframe to be
+    diagonal by multiplying it with the identity matrix
+
+    Args: dataframe to force into diagonal matrix
+
+    Returns:
+    forced diagonal matrix
+    """
     cov_matrix = df.cov()
     
     identity_matrix = np.eye(cov_matrix.shape[0])
@@ -106,8 +138,12 @@ def force_diagonal_cov(df) -> pd.DataFrame:
     return cov_matrix * identity_matrix
 
 
-#Plot results of normality tests for 5 stocks in a single image
-def five_fig_plot(df:pd.DataFrame):
+def fiveFigurePlot(df:pd.DataFrame):
+    """
+    Fit each column against gaussian and plot
+    histogram of each column and fitted gaussian.
+    Single image using different subplots.
+    """
     
     # Set up the plot
     fig, axs = plt.subplots(2, 3, figsize=(15, 10))
@@ -149,8 +185,17 @@ def five_fig_plot(df:pd.DataFrame):
     plt.show()
     return
 
-#log transform dataframe
-def log_transform(df):
+
+def logTransform(df):
+    """
+    Apply log transformation to dataframe.
+
+    Args:
+    df: dataframe to transform
+
+    Returns:
+    log(1 + df)
+    """
     # Make a copy of the DataFrame to avoid modifying the original
     df_log = df.copy()
     
@@ -161,3 +206,30 @@ def log_transform(df):
     df_log[numeric_columns] = np.log1p(df_log[numeric_columns])
     
     return df_log
+
+# FIXME should add resampling other than daily
+def graphPortfolioStocksPerformance(df_portfolio_simple_returns, returns_testing_simple):
+    """
+    Graph cumulative returns of portfolio and each stock index, highlighting the portfolio curve.
+
+    Args:
+    df_portfolio_simple_returns: dataframe containing the portfolio cumulative returns
+    returns_testing_simple: dataframe containing each stock simple cumulative returns
+
+    Returns:
+    nothing, prints graph interactively
+    """
+
+    df = pd.concat([df_portfolio_simple_returns, returns_testing_simple], axis=1)
+    series_to_highlight = 'Returns'
+    for column in df.columns:
+        if column != series_to_highlight:
+            plt.plot(df.index, df[column], label=column, alpha=0.5)
+            
+    # Highlight specific series
+    plt.plot(df.index, df[series_to_highlight], linewidth=2, color='blue', label=f"{series_to_highlight} (highlighted)")
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+    return
+

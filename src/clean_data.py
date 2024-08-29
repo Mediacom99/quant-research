@@ -16,7 +16,7 @@ import logging
 log = logging.getLogger('clean_data')
 
 
-def fill_mean(data, window = '5D'):
+def fillMean(data, window = '5D'):
     """
     Forward and backword filling of zeros and NaN values. Apply rolling average
     only over the previously filled values.
@@ -42,7 +42,7 @@ def fill_mean(data, window = '5D'):
                 
     return df
 
-def clean_data_run(rawDataPath: str, formattedDataPath: str):
+def cleanDataRun(rawDataPath: str, formattedDataPath: str):
     """
     Main function for this module. It is called once in the entry point run.py. 
     It loads data from data.xlsx, cleans, resamples and check for residuals nans.
@@ -53,14 +53,12 @@ def clean_data_run(rawDataPath: str, formattedDataPath: str):
     data = utils.get_data_from_excel(rawDataPath)
     
     #Log transformation of macro indices and fundamentals
-    data['Macroeconomics'] = utils.log_transform(data['Macroeconomics'])
-    data['Fondamentali Indici Azionari'] = utils.log_transform(data['Fondamentali Indici Azionari'])
+    data['Macroeconomics'] = utils.logTransform(data['Macroeconomics'])
+    data['Fondamentali Indici Azionari'] = utils.logTransform(data['Fondamentali Indici Azionari'])
     
-    ## DATA CLEANING
     log.info("cleaning dataframes...")
     for df in data:
-        data[df] = fill_mean(data[df]) 
-
+        data[df] = fillMean(data[df]) 
 
     # Resampling monthly and quarterly data into daily data using forward fill    
     log.info("starting resampling into daily timeframe...") 
@@ -69,7 +67,6 @@ def clean_data_run(rawDataPath: str, formattedDataPath: str):
     
     #Check for nan values after cleaning
     utils.count_nans(data)
-
 
     #Divide each sheet into its own dataframe
     returns =   data['Rendimenti Indici Azionari'] 
