@@ -1,7 +1,6 @@
 # Ctrl-C Ctrl-C to toggle the checkboxes
 * TODO Todo list [20%]
-  + [-] *model.
-    py* [7/11]
+  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/model.py][model.py]]* [7/11]
     + [X] fix structure linear_regression_model_train -> model_train -> run
     + [X] check print statements and loggin statements
     + [X] print portfolio weight matrix based on chosen timeperiod
@@ -15,17 +14,17 @@
           so that it can be compared to the total portfolio variance
     + [ ] add other portfolio benchmarks like VaR SVaR, RMSE
     + [X] add graph of weights over time
-  + [-] *eda.py* [2/5]
+  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/eda.py][eda.py]]* [2/5]
     + [ ] check stock cumulative returns graph
     + [ ] check plotWeeklystd
     + [ ] maybe add some comments and logs
     + [X] check naming conventions for funcs
     + [X] added logger
-  + [ ] *utils.py* [0/1]
+  + [ ] *[[https://github.com/Mediacom99/quant-research/blob/main/src/utils.py][utils.py]]* [0/1]
     + [ ] for the love of Terry please rename those fucking functions
-  + [X] *clean_data.py* [1/1]
+  + [X] *[[https://github.com/Mediacom99/quant-research/blob/main/src/clean_data.py][clean_data.py]]* [1/1]
     + [X] checked everything, good to go
-  + [-] *optimize.py* [1/3]
+  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/optimize.py][optimize.py]]* [1/3]
     + [X] check naming of funcs
     + [ ] add comments
     + [ ] calculate other values for portfolio performance:
