@@ -24,8 +24,7 @@
     + [X] check stdout vs logger
   + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/optimize.py][optimize.py]]* [3/4]
     + [X] MAJOR RIFACTOR:
-      + in optimize.py.optimizePortfoliorun I return the daily simple
-	portfolio returns for EVERY REBALANCING FREQUENCY.
+      + optimize.py.optimizePortfoliorun now returns daily simple portfolio returns for EVERY REBALANCING FREQUENCY.
     + [X] check naming of funcs
     + [X] add comments
     + [ ] calculate other values for portfolio performance:
