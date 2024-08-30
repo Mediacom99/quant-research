@@ -307,10 +307,9 @@ def tradingModelRun(
     portfolio_matrix = pd.DataFrame(columns = returns.columns)
     portfolio_variance = pd.Series(name='Portfolio Variance')
 
+    
     print("Starting rolling window loop, printing portfolio weights for each period:")
-    # Rolling window loop
     while (temp_date < final_date and temp_date < (final_date - STOP_OFFSET)):
-
         #Filter data given rolling window timeframe
         returns_testing = returns.loc[temp_date:temp_date + OFFSET - ONEBDAY]
 
@@ -352,11 +351,6 @@ def tradingModelRun(
         #Roll window
         temp_date += OFFSET
         print(" ")
-
-
-
-
-
 
     portfolio_simple_daily_returns  = pd.Series(pd.concat(temp_returns_list, axis = 0),
                                                 name = 'Portfolio Returns')

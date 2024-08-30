@@ -52,6 +52,7 @@ Finally to tackle the problem of choosing the factors and at the same time deali
 Equation \eqref{multifactor} can be written in vector-matrix notation:
 \begin{equation}
     \Vec{r}_{t+1} = \vec{b_0} + \mathbf{B}\vec{F}_{t} + \vec{\epsilon}
+    \label{linear-multifactor-model}
 \end{equation}
 Where: $\mathbf{B} = (b_{i,j})$ is the matrix of factors exposures, $i$ runs over the number of stock returns (N) while $j$ runs over the number of factors (K) chosen for the regression model, thus it's a (N,K) matrix. The matrix of the factors exposures is the objective of the regression model. The vector $\vec{F}_{t}$ is a (1,K) vector which represents the factor at time t. The vector $\vec{r}_{t+1}$ represents the expected returns at time t+1. The vector $\vec{\epsilon}$ represents the vector of errors of the regression model.
 
@@ -73,8 +74,8 @@ As we have seen in Figure \ref{fig:correlation-heatmap} the highest correlation 
 The standard Principal Components Analysis basically diagonalizes the covariance matrix and finds its eigenvectors. Using these eigenvectors as the transformation matrix it is possible to write every element of the initial base into the new base where the covariance matrix is diagonal (here the absence of covariance). One can then choose how many principal components to keep, thus how many of the eigenvectors with the biggest eigenvalues to keep. These principal components are directions in the new base that explain the most variance of the analyzed data. For this task I decided to choose the first five principal components, after some trial and error I found it was the most optimal choice, as it's shown in the following table and graphs. In reality once should carefully decide how to choose principal components, maybe even forcing a certain total explained variance, leaving the number of components chosen as variable.
 
 The following results have been calculated using the whole dataset apart from the last year which was kept for testing purposes.
-In figure \ref{fig:factor-contribution-pca1} we can see the contribution of each Macroeconomic factor and Fundamentals factor to the first five principal components chosen. There are some peaks, suggesting that there are certain factors that prevail on the others but overall the distribution is pretty equal.
-In figure \ref{fig:factor-contribution-pca2} the situation is quite different: we can see that the first three final principal components are basically the same as the first three Macro and Fundamentals principal components; the last two final principal components are a combination of rates, commodities and forex.
+In Figure \ref{fig:factor-contribution-pca1} we can see the contribution of each Macroeconomic factor and Fundamentals factor to the first five principal components chosen. There are some peaks, suggesting that there are certain factors that prevail on the others but overall the distribution is pretty equal.
+In Figure \ref{fig:factor-contribution-pca2} the situation is quite different: we can see that the first three final principal components are basically the same as the first three Macro and Fundamentals principal components; the last two final principal components are a combination of rates, commodities and forex.
 These final five principal components will be used in the next section as the input data to train the linear model.
 Table \ref{tab:pca-explained-variance} shows the percentage of the total variance of the factors explained by each principal component chosen, as well as the total explained variance of the first and second PCA run.
 
@@ -106,14 +107,31 @@ Table \ref{tab:pca-explained-variance} shows the percentage of the total varianc
 	\label{fig:factor-contribution-pca2}
 \end{figure}
 
-\subsection{Cross Validation of Linear Regressors}
-Here I want to use k-fold cross validation (dividing using TimeSeries) to compare different linear regressor and see which one performs better on the training data.
-First I need to show the histogram of the residuals using simple LinearRegression(OSL), then I can motivate the using a more robust regressor, then table with Cross Validation results, then explanation of chosen regressor. (Elastic net regularization, epsilon insensitive (linear support vector regression), SGD).
+\subsection{K-Fold Cross Validation of Linear Regressors}
+The principal components of the factors are the independent variables in the linear multi-factor model in eq.\eqref{linear-multifactor-model}. The next step is to decide which linear regression model and which kind of loss function to use.
+First I decided to use a simple Ordinary Least Squares model (scikit-learn LinearRegression() model) in order to see the distribution of the residuals. I kept the last year of data out of the training sample for testing purposes.
 
-\subsection{Implementation}
+In Figure AGGIUNGERE FIGURA each stock index residual distribution's histogram is shown. We can see clearly the same problem we encountered in Figure \ref{fig:stock-returns-normal}, a clear grouping around the center. We can confidently conclude that these residuals do not follow a Gaussian distribution.
 
+For this reason I decided to perform Cross Validation on different kinds of more robust linear regression models and loss functions. This cross validation has been performed on the whole dataset apart from the last year that was kept for later testing. The splitting strategy used respects the time nature of the data because successive training sets are supersets of those that come before them.
+The library uses the appropriate scoring method for each model and it normalizes different scores' results such that the highest number always represents the better score. [CITE THIS COMMENT]
+%https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html#sklearn.model_selection.TimeSeriesSplit]
+Here is the list of linear regression models from the python library \textit{scikit-learn} that I used to perform this cross validation:
 \begin{itemize}
-	\item Explain the linear regression model used and why we chose a Robust estimator (underlying normality of data assumption is not necessary)
+	\item LinearRegression()
+	\item PassiveAggressiveRegressor()
+	\item ElasticNet()
+	\item HuberRegressor()
+	\item TweedieRegressor()
+	\item SGDRegressor(loss='huber', shuffle=False)
+	\item SGDRegressor(loss='epsilon\_insensitive', shuffle=False)
+	\item SGDRegressor(loss='squared\_epsilon\_insensitive', shuffle=False, penalty='elasticnet', epsilon = 0.0001 * Y.std().mean())
 \end{itemize}
+Note: () means the linear regression model was called with the library default parameters.
+In Table INSERT THE FUCKING TABLE the results are shown. It's clear that the Stochastic Gradient Descent Regressor with a squared epsilon insensitive loss function, L1 and L2 penalties (elasticnet) and epsilon is chosen as $\frac{1}{1000}$ of the mean of the volatility of each stock index return used in the regression.
 
+EXPLAIN THE REASON behind this loss function and how the elastic net penalty works.
+
+Using this method on the training data we can calculate the matrix of factor exposures B in \eqref{linear-multifactor-model} and use eq.\eqref{cov-matrix-returns} to calculate the covariance matrix of expected returns. With this matrix we can implement an optimization algorithm to find the best asset allocation for our portfolio.
+All subsequent results have been calculated using the model with the highest score (the last one in the list).res-latex
 
