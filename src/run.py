@@ -32,7 +32,7 @@ formattedDatPath = '../formatted-data/formatted-data.xlsx'
 
 # RUN THE TRADING MODEL
 """
-Valid OFFSET values:
+Valid OFFSET/STOP_OFFSET values:
 - X business years: ofs.BYearEnd(X)
 - X business months: ofs.BMonthEnd(X)
 - X business weeks: ofs.BDay(5 * X)
@@ -41,11 +41,12 @@ Valid OFFSET values:
 
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = ofs.BYearEnd(1),
-          divide_years = 1, #Max is 16
+          OFFSET = ofs.BDay(1),
+          divide_years = 16, #Max is 16
           print_pca_factor_loadings = False,
           do_cross_validation = False,
-          portfolio_matrix_filename = '../portfolio-matrices/bohbohboh.xlsx'
+          portfolio_matrix_filename = '../portfolio-matrices/bohbohboh.xlsx',
+          STOP_OFFSET = ofs.BYearEnd(0)
           )
 
 logging.shutdown()

@@ -200,7 +200,13 @@ def graphPortfolioStocksPerformance(portfolio_simple_returns, returns_testing_si
     nothing, prints graph interactively
     """
     
-    df = pd.concat([portfolio_simple_returns, returns_testing_simple], axis=1)
+    df = pd.concat(
+        [
+            portfolio_simple_returns,
+            returns_testing_simple.loc[:portfolio_simple_returns.index.max()]
+        ],
+        axis=1
+    )
     series_to_highlight = portfolio_simple_returns.name
     for column in df.columns:
         if column != series_to_highlight:

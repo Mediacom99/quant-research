@@ -260,7 +260,15 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
 
 
 
-def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pca_factor_loadings: bool, do_cross_validation: bool, portfolio_matrix_filename: str, divide_years = 16):
+def tradingModelRun(
+        formattedDataPath: str,
+        OFFSET: pd.tseries.offsets,
+        print_pca_factor_loadings: bool,
+        do_cross_validation: bool,
+        portfolio_matrix_filename: str,
+        divide_years = 16,
+        STOP_OFFSET: pd.tseries.offsets = pd.tseries.offsets.BDay(0)
+):
     '''
     This function runs the trading model with a rolling window approach defined by the OFFSET argument.
     The data is initially divided keeping divide_years of business years as training datta, the first testing
@@ -272,6 +280,10 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     OFFSET: tseries.offset, rolling window period
     print_pca_factor_loadings: wether  to print PCA graphs and explained variance
     do_cross_validation: wether to perform cross validation of different regressors
+    portfolio_matrix_filename: name (with .xlsx) for the excel file where to save the portfolio
+                               matrix
+    divide_years: number of years to use for the first training in the rolling window approach
+    STOP_OFFSET: time offset to stop rolling window loop before end of historical data
 
     Returns:
     print-only function.
@@ -297,15 +309,18 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
 
     print("Starting rolling window loop, printing portfolio weights for each period:")
     # Rolling window loop
-    while temp_date < final_date:
+    while (temp_date < final_date and temp_date < (final_date - STOP_OFFSET)):
+
         #Filter data given rolling window timeframe
         returns_testing = returns.loc[temp_date:temp_date + OFFSET - ONEBDAY]
+
+        #Update training data
         training_data = utils.timeFilterDataFrameCollection(
             data,
             start_date = start_date,
             end_date = temp_date
         )
-
+            
         #Calculate covariance matrix of expected returns
         cov_matrix_expected_returns = getCovMatrixFutureReturns(
             training_data=training_data,
@@ -325,7 +340,6 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
         #Append weights to portfolio matrix
         portfolio_matrix.loc[temp_date] = optimize_result['weights']
 
-
         logger.info("offset start(test start) is %s", temp_date)
         logger.info("testing end is %s", temp_date + OFFSET - ONEBDAY)
         logger.info("training end is %s", temp_date - ONEBDAY)
@@ -338,6 +352,8 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
         #Roll window
         temp_date += OFFSET
         print(" ")
+
+
 
 
 
