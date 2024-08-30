@@ -61,13 +61,13 @@ def optimizePortfolioRun(cov_expected_returns: pd.DataFrame, returns_testing: pd
     """
 
     op_w = optimizationRun(cov_expected_returns)
-    logger.info("Optimized weights:")
-    print(op_w)
+    #logger.info("Optimized weights:")
+    print(f"{returns_testing.index.min().date()} - {returns_testing.index.max().date()} {op_w}")
 
     returns_testing_simple = np.exp(returns_testing) - 1
 
     # SIMPLE RETURNS COMBINE LINEARLY, LOG RETURNS DO NOT
-    tf_portfolio_returns: pd.DataFrame = returns_testing_simple@(op_w)
+    tf_portfolio_returns = returns_testing_simple@(op_w)
 
     # Rolling window timeframe (tf) portfolio log returns
     tf_portfolio_returns_log = np.log(tf_portfolio_returns + 1)
@@ -79,10 +79,10 @@ def optimizePortfolioRun(cov_expected_returns: pd.DataFrame, returns_testing: pd
     
     #Considering no covariance between trading days
     #Portfolio variance by fixing weights over rolling window period
-    total_portfolio_var_over_tf = portfolio_var_from_tf * tf_portfolio_returns.size 
+    total_portfolio_var_over_tf = portfolio_var_from_tf * tf_portfolio_returns.size
 
     return {
-        'lreturn' : tf_portfolio_returns_log.sum(),
+        'sreturn' : tf_portfolio_returns,
         'lvar' : total_portfolio_var_over_tf,
         'weights' : op_w 
     }

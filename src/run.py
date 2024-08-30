@@ -12,7 +12,7 @@ import logging
 import pandas.tseries.offsets as ofs
 
 #Logger configuration
-logging.basicConfig(level=logging.CRITICAL, filename='minerva-task.log', filemode='w+') # filemode = 'a' for appending to same file
+logging.basicConfig(level=logging.CRITICAL, filename='minerva-task.log', filemode='w+')
 
 print("Logs are saved in \"minerva-task.log\"")
 
@@ -29,10 +29,10 @@ rawDataPath = '../raw-data/data.xlsx'
 formattedDatPath = '../formatted-data/formatted-data.xlsx'
 
 # Clean data (this module cleans raw data)
-# clean_data.clean_data_run(rawDataPath, formattedDatPath)
+#clean_data.cleanDataRun(rawDataPath, formattedDatPath)
 
 # Exploratory data anlysis
-# eda.eda_run(formattedDatPath, skipAndersonDarling=True)
+#eda.edaRun(formattedDatPath, skipAndersonDarling=True)
 
 # Run the trading model
 """
@@ -45,7 +45,7 @@ Valid OFFSET values:
 
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = ofs.BDay(1),
+          OFFSET = ofs.BYearEnd(1),
           divide_years = 16,
           print_pca_factor_loadings = False,
           do_cross_validation = False

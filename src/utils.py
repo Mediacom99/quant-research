@@ -219,7 +219,7 @@ def graphPortfolioStocksPerformance(portfolio_simple_returns, returns_testing_si
     Returns:
     nothing, prints graph interactively
     """
-
+    
     df = pd.concat([portfolio_simple_returns, returns_testing_simple], axis=1)
     series_to_highlight = portfolio_simple_returns.name
     for column in df.columns:

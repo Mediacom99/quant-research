@@ -1,6 +1,6 @@
 # Ctrl-C Ctrl-C to toggle the checkboxes
-* TODO Todo list [20%]
-  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/model.py][model.py]]* [7/11]
+* TODO Todo list [0%]
+  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/model.py][model.py]]* [7/9]
     + [X] fix structure linear_regression_model_train -> model_train -> run
     + [X] check print statements and loggin statements
     + [X] print portfolio weight matrix based on chosen timeperiod
@@ -9,24 +9,25 @@
     + [X] check variable naming and comments
     + [X] make func for plotting the portfolio and stocks return with highlight
           also fix resampling for timeframes other than daily
-    + [ ] add resampling into daily data for utils.graphPortfoliostocksperformance
-    + [ ] add max and min variance of single stock over whole testing period
-          so that it can be compared to the total portfolio variance
-    + [ ] add other portfolio benchmarks like VaR SVaR, RMSE
     + [X] add graph of weights over time
-  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/eda.py][eda.py]]* [2/5]
+  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/eda.py][eda.py]]* [2/6]
     + [ ] check stock cumulative returns graph
     + [ ] check plotWeeklystd
     + [ ] maybe add some comments and logs
     + [X] check naming conventions for funcs
     + [X] added logger
+    + [ ] check stdout vs logger
   + [ ] *[[https://github.com/Mediacom99/quant-research/blob/main/src/utils.py][utils.py]]* [0/1]
     + [ ] for the love of Terry please rename those fucking functions
-  + [X] *[[https://github.com/Mediacom99/quant-research/blob/main/src/clean_data.py][clean_data.py]]* [1/1]
+  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/clean_data.py][clean_data.py]]* [1/2]
     + [X] checked everything, good to go
-  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/optimize.py][optimize.py]]* [1/3]
+    + [ ] check stdout vs logger
+  + [-] *[[https://github.com/Mediacom99/quant-research/blob/main/src/optimize.py][optimize.py]]* [3/4]
+    + [X] MAJOR RIFACTOR:
+      + in optimize.py.optimizePortfoliorun I return the daily simple
+	portfolio returns for EVERY REBALANCING FREQUENCY.
     + [X] check naming of funcs
-    + [ ] add comments
+    + [X] add comments
     + [ ] calculate other values for portfolio performance:
       + Sortino Ratio
       + Maximum Drawdown

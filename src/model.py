@@ -1,4 +1,3 @@
-
 """
 This module deals with training the model, calculating the covariance matrix
 of expected returns and optimizing the portfolio based on this matrix. The model uses PCA on different factors and a linear multifactor model to explain the relation between factors and stock indices returns.
@@ -292,14 +291,11 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     ONEBDAY = pd.tseries.offsets.BDay(1)
     temp_date = divide_date
 
-    trading_model_result = pd.DataFrame(
-        columns=['Portfolio Returns', 'Portfolio Variance', 'Sharpe Ratio']
-    )
-    
-    portfolio_matrix = pd.DataFrame(
-        columns = returns.columns,
-    )
+    temp_returns_list = []
+    portfolio_matrix = pd.DataFrame(columns = returns.columns)
+    portfolio_variance = pd.Series(name='Portfolio Variance')
 
+    print("Starting rolling window loop, printing portfolio weights for each period:")
     # Rolling window loop
     while temp_date < final_date:
         #Filter data given rolling window timeframe
@@ -319,40 +315,47 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
 
         #Optimize the portfolio and check performance against testing dataset
         optimize_result = op.optimizePortfolioRun(cov_matrix_expected_returns, returns_testing)
+        
+        #Append daily portfolio results for this period to a temporary list
+        temp_returns_list.append(optimize_result['sreturn'])
 
-        #Append result to final result dataframe
-        trading_model_result.loc[temp_date] = [optimize_result['lreturn'], optimize_result['lvar'], 0]
-
+        #Append variance to final variance dataframe
+        portfolio_variance.loc[temp_date] = optimize_result['lvar']
+     
         #Append weights to portfolio matrix
         portfolio_matrix.loc[temp_date] = optimize_result['weights']
+
         
-        logger.warning("offset start(test start) is %s", temp_date)
-        logger.warning("testing end is %s", temp_date + OFFSET - ONEBDAY)
-        logger.warning("training end is %s", temp_date - ONEBDAY)
-        logger.warning("Number of testing days (size of ): %s\n",
+        logger.info("offset start(test start) is %s", temp_date)
+        logger.info("testing end is %s", temp_date + OFFSET - ONEBDAY)
+        logger.info("training end is %s", temp_date - ONEBDAY)
+        logger.info("Number of testing days (size of ): %s\n",
                        returns_testing['Indice Azionario Paese 1'].size)
         _returns_testing_simple_max = np.abs((np.exp(returns_testing.sum()) - 1)).max()
-        logger.warning("singular stock biggest total cumulative return: %s\n\n",
+        logger.info("singular stock biggest total cumulative return: %s\n\n",
                        _returns_testing_simple_max)
 
         #Roll window
         temp_date += OFFSET
 
 
-    portfolio_log_cum_returns = trading_model_result['Portfolio Returns']
-    portfolio_variance = trading_model_result['Portfolio Variance']
 
-    portfolio_simple_cum_return_total = np.exp(portfolio_log_cum_returns.sum()) - 1
-    portfolio_simple_cum_returns = np.exp(portfolio_log_cum_returns.cumsum()) - 1
 
-    returns_testing_cum_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
-
+    portfolio_simple_daily_returns  = pd.Series(pd.concat(temp_returns_list, axis = 0),
+                                                name = 'Portfolio Returns')
+    
+    portfolio_cum_returns = portfolio_simple_daily_returns.cumsum()
+    portfolio_cum_return_tot = portfolio_simple_daily_returns.sum()
+    
     #Standard deviation of the portfolio over the total testing period
     portfolio_volatility = np.sqrt(portfolio_variance.sum())
 
-    print(f"Total portfolio return over testing period: {(portfolio_simple_cum_return_total*100):.2f}%")
+    #Cumulative stocks return for testing period
+    returns_testing_cum_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
+
+    print(f"Total portfolio return over testing period: {(portfolio_cum_return_tot*100):.2f}%")
     print(f"Total portfolio volatility over testing period: {(portfolio_volatility*100):.2f}%")
-    print(f"Sharpe Ratio over testing period: {portfolio_simple_cum_return_total / portfolio_volatility:.2f}")
+    print(f"Sharpe Ratio over testing period: {portfolio_cum_return_tot / portfolio_volatility:.2f}")
     print(f"Max single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).max()*100):.2f}%")
     print(f"Min single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
     #TODO print max and min variance
@@ -360,10 +363,10 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     #Here the two inputs might be in different timeframes (daily, monthly)
     # it depends on the chosen rebalancing frequency
     utils.graphPortfolioStocksPerformance(
-        portfolio_simple_cum_returns,
+        portfolio_cum_returns,
         returns_testing_cum_simple
     )
 
-    portfolio_matrix.to_excel("../portfolio-matrices/portfolio-matrixBDay1.xlsx")
+    # #portfolio_matrix.to_excel("../portfolio-matrices/portfolio-matrixBDay1.xlsx")
     utils.graphPortfolioWeights(portfolio_matrix)
-    return
+    # return
