@@ -25,7 +25,7 @@ def normalFitTest(series: pd.Series, statistic:str):
 
 def plotWeeklyStd(df:pd.DataFrame):
     # Calculate weekly variance
-    weekly_var = df.resample('W').std()
+    weekly_var = df.resample('5B').std()
 
     # Plot
     fig, axs = plt.subplots(2, 3, figsize=(15, 10))
@@ -87,10 +87,10 @@ def plotCumReturns(df):
 
 def  edaRun(formattedDataPath: str, skipAndersonDarling: bool):
 
-    data = utils.get_data_from_excel(formattedDataPath)
-    returns_norm = utils.normalize_dataframe(data['Stock returns'])
+    data = utils.getDataFromExcel(formattedDataPath)
+    returns_norm = utils.normalizeDataFrame(data['Stock returns'])
 
-
+    print("Starting Exploratory Data Analysis")
     for cols_name, series in returns_norm.items():
         print(cols_name, ":")
         print("\tMean: ", series.mean())
@@ -103,8 +103,10 @@ def  edaRun(formattedDataPath: str, skipAndersonDarling: bool):
             result_ad = normalFitTest(series, 'ad')
             print("\t\tP-value: ", result_ad.pvalue)
 
+    print("Stock returns histograms:")
     utils.fiveFigurePlot(returns_norm)
 
+    print("Weekly standard deviation over time plot:")
     plotWeeklyStd(returns_norm)
 
     #Correlation Analysis
@@ -115,5 +117,8 @@ def  edaRun(formattedDataPath: str, skipAndersonDarling: bool):
 
     print("Stocks cumulative returns:")
     plotCumReturns(data['Stock returns'])
+
+    print("Finished Exploratory Data Analysis")
+    logger.info("Finished Exploratory Data Analysis")
 
     return

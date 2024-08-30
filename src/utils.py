@@ -8,11 +8,7 @@ import logging as log
 
 logger = log.getLogger('utils')
 
-
-#Reads sheets of excel file, set datetime format and 
-#date column as index. Returns collection of dataframes,
-# one for each sheet of the xlsx file.
-def get_data_from_excel(file_name):
+def getDataFromExcel(file_name):
     """Load data from excel file with multiple sheets
 
     Args:
@@ -35,7 +31,7 @@ def get_data_from_excel(file_name):
         
     return data
 
-def count_nans(collection):
+def countNans(collection):
     """
     Count number of NaN in the collection of dataframes passed as input. Prints the number 
     for each column, for each dataframe on stdout.
@@ -47,7 +43,7 @@ def count_nans(collection):
     
     return
 
-def normalize_dataframe(dataframe):
+def normalizeDataFrame(dataframe):
     """Normalize dataframe values for mean zero and variance one. It uses StandardScaler
        from sklearn. It does not change the original dataframe.
 
@@ -63,22 +59,7 @@ def normalize_dataframe(dataframe):
     df = pd.DataFrame(values, columns=df.columns, index=dataframe.index)
     return df
 
-# #TODO Generalize date
-# def divide_df_lastyear(df):
-#     """Divide dataframe into two dataframes, cutting the original one at a certain date
-
-#     Args:
-#         dataframe (pd.DataFrame): original dataframe to cut
-
-#     Returns:
-#         (pd.DataFrame, pd.DataFrame): returns a tuple like (training DataFrame, testing DataFrame) 
-#     """
-#     training = df.loc[:'2018-12-31']
-#     testing = df.loc['2019-01-01':]
-#     return (training, testing)
-
-
-def timeFilterDataframeCollection(data, start_date, end_date) -> pd.DataFrame:
+def timeFilterDataFrameCollection(data, start_date, end_date) -> pd.DataFrame:
     """
     Filter the date-indexed (datetime format) collection of dataframes
     given a starting date and end_date
@@ -207,7 +188,6 @@ def logTransform(df):
     
     return df_log
 
-# FIXME should add resampling other than daily
 def graphPortfolioStocksPerformance(portfolio_simple_returns, returns_testing_simple):
     """
     Graph cumulative returns of portfolio and each stock index, highlighting the portfolio curve.

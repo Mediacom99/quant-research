@@ -49,8 +49,9 @@ def cleanDataRun(rawDataPath: str, formattedDataPath: str):
     Writes a xlsx file containing every dataframe in a different sheet.
     """
     log.info("CLEAN_DATA.PY STARTING")
+    print("clean_data.py starting, check log file")
     log.info("loading raw data.xlsx file...")
-    data = utils.get_data_from_excel(rawDataPath)
+    data = utils.getDataFromExcel(rawDataPath)
     
     #Log transformation of macro indices and fundamentals
     data['Macroeconomics'] = utils.logTransform(data['Macroeconomics'])
@@ -66,7 +67,7 @@ def cleanDataRun(rawDataPath: str, formattedDataPath: str):
     fund_daily = data['Fondamentali Indici Azionari'].resample('B').ffill()
     
     #Check for nan values after cleaning
-    utils.count_nans(data)
+    utils.countNans(data)
 
     #Divide each sheet into its own dataframe
     returns =   data['Rendimenti Indici Azionari'] 
@@ -74,7 +75,6 @@ def cleanDataRun(rawDataPath: str, formattedDataPath: str):
     forex   =   data['Forex'] 
     commod  =   data['Commodities']
     
-
     log.info("writing formatted-data xlsx file...")
     #Print each cleaned dataframe into its own sheet in the same excel file
     with pd.ExcelWriter(formattedDataPath) as writer:
@@ -86,4 +86,5 @@ def cleanDataRun(rawDataPath: str, formattedDataPath: str):
         fund_daily.to_excel(writer, sheet_name='Fundamentals')
     
     log.info("dataset cleaned successfully!")
+    print("dataset cleaned successfully, check log file!")
     return

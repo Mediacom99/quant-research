@@ -165,12 +165,11 @@ def regressionModelRun(Y, X, model = LinearRegression(), x_for_predict = pd.Data
     y_pred = model.predict(X)
     residuals = (Y - y_pred)
 
-    #TODO HERE I CAN DO THINGS WITH RESIDUALS
-    #print("Residuals mean:")
-    #print(residuals.mean())
-    #print("Residuals std:")
-    #print(residuals.std())
+    # #Residuals fit against standardized gaussian
+    # print("residuals histograms graph:")
+    # utils.fivefigureplot(residuals)
 
+    
     if (x_for_predict.empty):
         logger.info("no predict_data provided. Forecasted data will be returned empty.")
         return (residuals, coef_df, intercepts)
@@ -209,7 +208,7 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
     # Normalize ONLY the factors for PCA
     for df in training_data:
         if(df != 'Stock returns'):
-            factor_training[df] = utils.normalize_dataframe(training_data[df])
+            factor_training[df] = utils.normalizeDataFrame(training_data[df])
 
 # -------------------- Principal Component Analysis --------------------------------------------------------------------------------------------------
 
@@ -261,7 +260,7 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
 
 
 
-def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pca_factor_loadings: bool, do_cross_validation: bool, divide_years = 16):
+def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pca_factor_loadings: bool, do_cross_validation: bool, portfolio_matrix_filename: str, divide_years = 16):
     '''
     This function runs the trading model with a rolling window approach defined by the OFFSET argument.
     The data is initially divided keeping divide_years of business years as training datta, the first testing
@@ -279,9 +278,10 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     '''
 
     logger.info("MODEL.PY STARTING")
+    print("Starting Trading Model with Rolling Window")
 
     #Load data from provided path
-    data = utils.get_data_from_excel(formattedDataPath)
+    data = utils.getDataFromExcel(formattedDataPath)
 
     returns = data['Stock returns']
 
@@ -300,7 +300,7 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
     while temp_date < final_date:
         #Filter data given rolling window timeframe
         returns_testing = returns.loc[temp_date:temp_date + OFFSET - ONEBDAY]
-        training_data = utils.timeFilterDataframeCollection(
+        training_data = utils.timeFilterDataFrameCollection(
             data,
             start_date = start_date,
             end_date = temp_date
@@ -315,17 +315,17 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
 
         #Optimize the portfolio and check performance against testing dataset
         optimize_result = op.optimizePortfolioRun(cov_matrix_expected_returns, returns_testing)
-        
+
         #Append daily portfolio results for this period to a temporary list
         temp_returns_list.append(optimize_result['sreturn'])
 
         #Append variance to final variance dataframe
         portfolio_variance.loc[temp_date] = optimize_result['lvar']
-     
+
         #Append weights to portfolio matrix
         portfolio_matrix.loc[temp_date] = optimize_result['weights']
 
-        
+
         logger.info("offset start(test start) is %s", temp_date)
         logger.info("testing end is %s", temp_date + OFFSET - ONEBDAY)
         logger.info("training end is %s", temp_date - ONEBDAY)
@@ -337,16 +337,17 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
 
         #Roll window
         temp_date += OFFSET
+        print(" ")
 
 
 
 
     portfolio_simple_daily_returns  = pd.Series(pd.concat(temp_returns_list, axis = 0),
                                                 name = 'Portfolio Returns')
-    
+
     portfolio_cum_returns = portfolio_simple_daily_returns.cumsum()
     portfolio_cum_return_tot = portfolio_simple_daily_returns.sum()
-    
+
     #Standard deviation of the portfolio over the total testing period
     portfolio_volatility = np.sqrt(portfolio_variance.sum())
 
@@ -367,6 +368,7 @@ def tradingModelRun(formattedDataPath: str, OFFSET: pd.tseries.offsets, print_pc
         returns_testing_cum_simple
     )
 
-    # #portfolio_matrix.to_excel("../portfolio-matrices/portfolio-matrixBDay1.xlsx")
+    portfolio_matrix.to_excel(portfolio_matrix_filename)
     utils.graphPortfolioWeights(portfolio_matrix)
-    # return
+    print("Finished Trading Model with Rolling Window, check log file!")
+    return
