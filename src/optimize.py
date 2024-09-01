@@ -74,17 +74,9 @@ def optimizePortfolioRun(cov_expected_returns: pd.DataFrame, returns_testing: pd
     # Rolling window timeframe (tf) portfolio log returns
     tf_portfolio_returns_log = np.log(tf_portfolio_returns + 1)
 
-    logger.critical("portfolio cumulative simple returns: %s", np.exp(tf_portfolio_returns_log.sum()) - 1)
-
-    #Daily porfolio variance of the training dataset
-    portfolio_var_from_tf = op_w.T @ cov_expected_returns @ op_w
-    
-    #Considering no covariance between trading days
-    #Portfolio variance by fixing weights over rolling window period
-    total_portfolio_var_over_tf = portfolio_var_from_tf * tf_portfolio_returns.size
+    logger.info("portfolio cumulative simple returns: %s", np.exp(tf_portfolio_returns_log.sum()) - 1)        
 
     return {
         'sreturn' : tf_portfolio_returns,
-        'lvar' : total_portfolio_var_over_tf,
         'weights' : op_w 
     }

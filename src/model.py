@@ -160,6 +160,7 @@ def regressionModelRun(Y, X, model = LinearRegression(), x_for_predict = pd.Data
                         columns=Y.columns,
                         index=X.columns)
 
+
     intercepts = pd.DataFrame(intercepts, columns=['Intercepts'], index = Y.columns)
 
     y_pred = model.predict(X)
@@ -231,7 +232,7 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
 
     X = factors_lag
     Y = returns
-
+    
     if(do_cross_validation):
         print("Cross validation mean scores (higher is always better):")
         crossValidationRegressors(X,Y)
@@ -255,7 +256,7 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
 
     # Covariance matrix of expected returns
     cov_future_returns = exposures.T @ X.cov() @ exposures + residuals_matrix
-
+    
     return cov_future_returns
 
 
@@ -305,7 +306,6 @@ def tradingModelRun(
 
     temp_returns_list = []
     portfolio_matrix = pd.DataFrame(columns = returns.columns)
-    portfolio_variance = pd.Series(name='Portfolio Variance')
 
 
     print("Starting rolling window loop, printing portfolio weights for each period:")
@@ -333,9 +333,6 @@ def tradingModelRun(
         #Append daily portfolio results for this period to a temporary list
         temp_returns_list.append(optimize_result['sreturn'])
 
-        #Append variance to final variance dataframe
-        portfolio_variance.loc[temp_date] = optimize_result['lvar']
-
         #Append weights to portfolio matrix
         portfolio_matrix.loc[temp_date] = optimize_result['weights']
 
@@ -359,16 +356,22 @@ def tradingModelRun(
     portfolio_cum_return_tot = portfolio_simple_daily_returns.sum()
 
     #Standard deviation of the portfolio over the total testing period
-    portfolio_volatility = np.sqrt(portfolio_variance.sum())
-
+    portfolio_volatility = np.sqrt(portfolio_simple_daily_returns.var() * portfolio_simple_daily_returns.size)
+    
     #Cumulative stocks return for testing period
     returns_testing_cum_simple: pd.DataFrame = np.exp(returns.loc[divide_date:final_date].cumsum()) - 1
-
+    returns_testing_simple = returns.loc[divide_date:final_date]
+    single_min_vol = np.sqrt((returns_testing_simple.var() * returns_testing_cum_simple.size).min())
+    single_max_vol = np.sqrt((returns_testing_simple.var() * returns_testing_cum_simple.size).max())
+    
     print(f"Total portfolio return over testing period: {(portfolio_cum_return_tot*100):.2f}%")
     print(f"Total portfolio volatility over testing period: {(portfolio_volatility*100):.2f}%")
     print(f"Sharpe Ratio over testing period: {portfolio_cum_return_tot / portfolio_volatility:.2f}")
-    print(f"Max single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).max()*100):.2f}%")
-    print(f"Min single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
+    print(f"Max single cumulative stock return over whole testing period:{((np.exp(returns.loc[divide_date:final_date].sum()) - 1).max()*100):.2f}%")
+    print(f"Min single cumulative stock return over whole testing period:{((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
+    print(f"Singular stock index lowest volatility: {single_min_vol:.2%}")
+    print(f"Singular stock index highest volatility: {single_max_vol:.2%}")
+    
     #TODO print max and min variance
 
     #Here the two inputs might be in different timeframes (daily, monthly)
@@ -380,5 +383,5 @@ def tradingModelRun(
 
     portfolio_matrix.to_excel(portfolio_matrix_filename)
     utils.graphPortfolioWeights(portfolio_matrix)
-    print("Finished Trading Model with Rolling Window, check log file!")
+    print("Finished Trading Model with Rolling Window, check log file for more information")
     return
