@@ -1,34 +1,23 @@
-\begin{enumerate}
-    \item risk-parity (uses only covariance matrix of forecasted returns
-    \item mean-variance (sucks)
-\end{enumerate}
-The most important thing is to handle correctly the risk!
+Since Markov first economic theories there have been developed many ways to optimize the allocation of different assets in a portfolio. Should one consider the historical average of the returns ? Should one try to find the portfolio with the highest return ? Or the standard deviation ? Or maybe one should allocate assets in a portfolio in order to reach the minimum possible variance. For this task I decided to allocate the risk instead of allocating the capital. I used a risk-parity approach that can be summed up like this: the portfolio is optimized such that each asset's contribution to the total portfolio volatility is equal. I followed the procedure in the third section of INSEISCI REF PAPER RISK PARITY DIOCANEEE.
 
-Rebalancing: train model, forecast, optimize, calculate weight, then change timeframe, retrain, forecast, optimize and calculate weight
-I think this is how you create a portfolio weight matrix.
-Then you can also simulate a real scenario, starting from data and given a certain frequency you update the data and remove the oldest timeframe data and repeat.
-VERY IMPORTANT TO CALCULATE STUFF ABOUT RISK AND PERFORMANCE OF PORTFOLIO:
-\begin{enumerate}
-    \item Sharp Ratio
-    \item Mean Squared Error
-    \item VaR
-    \item sVaR
-    \item ask claude
-    \item study optimal weights over time using rolling window rebalancing
-\end{enumerate}
-
-This is the idea:
-
-Divide dataset into some years of training (like 5) and 1 year of testing. Run the model and calculate weights. Make sure the relationship between returns and factors in the regression model is lagged like:
+Before writing the objective function of the optimization problem, two quantities need to be introduced: the marginal risk contribution (MRC) and the risk contribution (RC). The MRC is calculated as follows:
 \begin{equation}
-    y_t = bf_{t-1}
+	\vec{\textit{MRC}} = \mathbf{\Sigma}\vec{w}
 \end{equation}
-Then test this model with a balancing frequency of one week: start with first weights from training data, calculate portfolio return in that week given actual prices. Use that week data to rerun the model, recalculate new weights fore the next week and repeat. Like this you can create a portfolio weight matrix of weeks and assets weights over the year of testing data. 
-
-Then I could do two approaches: use rolling window (shift training and testing sets by one year in the future and repeat calculation of new portfolio weight matrix) or I could use different year for the testing data to see how my model reacts to different markets (K-Fold Cross Validation is the way to do every possible combination).
-
-Anyway each time I calculate the weights I have to calculate stats for the portfolio such as returns and other stuff (Sharpe Ratio, VaR, SVaR and others)
-
-I could do the overall performance testing on the last year and maybe testing only on the periods of greater variance movement in order to see how the model performs under critical economic conditions. 
-There is alwyas K-Fold cross validation available.
-
+where $\Sigma$ is the covariance matrix of expected returns. The components of MRC represent the contribution of each asset based on its volatility and the weights of the portfolio.
+The Risk Contribution is obtained as follows:
+\begin{equation}
+	\vec{\textit{RC}} = \frac{(w * \vec{\textit{MRC}})}{\Vec{w}^{T}\mathbf{\Sigma}\Vec{w}}
+\end{equation}
+where $*$ represents element-wise multiplication and the denominator is the portfolio volatility.
+Now the objective function can be constructed easily, we impose that each element of the Risk Contribution vector is equal, thus:
+\begin{equation}
+	f(\vec{x}) = \sum_{i = 1, j = i + 1}^{N} (\vec{\textit{RC}}_i (\vec{x}) - \vec{\textit{RC}}_j (\vec{x}))^2 
+	\label{risk-parity-objfunc}
+\end{equation}
+So the minimization problem, adding the constraints for a long-only trading model and complete asset allocation is:
+\begin{equation}
+	min_{\vec{x} \in \mathcal{R}^N_{+} : \sum_{i = 1}^{N} x_i = 1} f(\vec{x})
+\end{equation}
+where $\vec{x}$ is the portfolio weights vector and $N$ is number of assets in the portfolio.
+The solutions to this minimization problem are the optimal, risk-parity adjusted, weights with which to build the portfolio. WHICH PYTHON FUNCTION DID YOU USE ? OR METHOD ?

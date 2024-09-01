@@ -160,13 +160,26 @@ In Table \ref{tab:crossval-results} the cross validation results are shown. It's
 	\label{tab:crossval-results}
 \end{table}
 
-EXPLAIN THE REASON behind this loss function and how the elastic net penalty works.
-The Stochastic Gradiend Descent is a minimization algorithm that calculates with random sampling the gradient of the following function:
+Let's consider a set of training data $(\vec{x_1}, y_1),\dots,(\vec{x_n}, y_n)$ where $\vec{x_i} \in \mathcal{R}^m$ (our factors) and $y_i \in \mathcal{R}$ (our stock indices returns). The goal is to learn a linear scoring function $f(x) = \vec{w}^{T}\cdot\vec{x} + b$ with model parameters $\vec{w} \in \mathcal{R}^m$ (our factor exposures) and intercept $b \in \mathcal{R}$.
+To find the model parameters, the following function is minimized using the Stochastic Gradient Descent method:
 \begin{equation}
-	Equazione di cui fai il gradiente
+	E(\vec{w},b) = \frac{1}{n} \sum_{i=1}^n L(y_i, f(\vec{x_i}, \vec{w})) + \alpha R(\vec{w})
+	\label{reg-train-error}
 \end{equation}
-Squared epsilon insensitive = cutoff at epsilon, then its quadratic
+This function is called the regularized training error where $L$ is the Squared Epsilon Insensitive loss function and $R$ is the Elastic Net regularization term. $\alpha$ is a non negative hyperparameter that controls the regularization strength.
+The Epsilon Squared Insensitive loss function is the following:
+\begin{equation}
+	L(y_i, f(\vec{x_i})) = max(0, (y_i - f(\vec{x_i}))) - \epsilon)^2
+	\label{sq-ins-epsilon}
+\end{equation}
+Thus when the error is greater than $\epsilon$ the loss function is quadratic, otherwise it's zero, ignoring that error. The above mentioned choice for epsilon now makes sense, we are telling the model to ignore errors that are less than $1\%$ of the average returns standard deviation throughout the whole training period.
 
-Using this method on the training data we can calculate the matrix of factor exposures B in \eqref{linear-multifactor-model} and use eq.\eqref{cov-matrix-returns} to calculate the covariance matrix of expected returns. With this matrix we can implement an optimization algorithm to find the best asset allocation for our portfolio.
-All subsequent results have been calculated using the model with the highest score (the last one in the list)
+The Elastic Net regularization function is:
+\begin{equation}
+	R(\vec{w}) = \frac{\rho}{2} ||\vec{w}||_{2}^2 + (1-\rho)\sum_{j = 1}^{m} |w_j|
+\end{equation}
+with $\rho$ set at default library value ($0.15$). The L2 norm term makes the loss function strongly convex, and therefore it has a unique minimum. It also handles highly correlated variables better than OSL. The L1 norm (second term) handles possible sparsity of coefficients.
+
+Using this method on the training data we can calculate the matrix of factor exposures $B$ in eq. \eqref{linear-multifactor-model} and use eq.\eqref{cov-matrix-returns} to calculate the covariance matrix of expected returns. With this matrix we can implement an optimization algorithm to find the best asset allocation for our portfolio.
+All subsequent results have been calculated using the model with the highest score (the last one in the list).
 

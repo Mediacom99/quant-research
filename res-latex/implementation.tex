@@ -1,2 +1,33 @@
 
 Explain from formattedData to portfolio results. With rolling window. 
+
+\begin{enumerate}
+\item divide returns and factors datasets into training and testing
+\item Normalize factors
+\item Apply PCA on factors
+\item Lag factors by shifting them one day into the future
+\item run SGD regressor
+\item calculate cov matrix with formula with eq. \eqref{cov-matrix-returns}
+\item Find optimized portfolio weights using cov matrix 
+\item calculate portfolio performance with this optimized weights on the testing data.
+\end{enumerate}
+In order to better represent an actual real-world implementation of this model I decided to use a Rolling Window approach. I start with a certain division between training and testing data, I run the aformentioned algorithm, then I add the testing data used in this run to the training data that will be used in the next run. Then I repeat. 
+
+\begin{algorithm}
+	\caption{Rolling Window Model Deployment}
+	\begin{algorithmic}[1]
+		\STATE TEMPDATE = initial training/testing division date
+		\WHILE{TEMPDATE < FINALDATE}
+		\STATE Divide returns and factors into training and testing initial datasets
+		\STATE Normalize the factors
+		\STATE Apply two PCA runs on factors
+		\STATE Lag factors
+		\STATE Run SGD regressor
+		\STATE calculate calculate cov matrix with formula with eq. \eqref{cov-matrix-returns}
+		\STATE Find optimized portfolio weights using cov matrix
+		\STATE Calculate portfolio performance over period
+		\STATE TEMPDATE + chosen OFFSET (day, week, month, year)
+		\ENDWHILE
+		\RETURN daily portfolio returns over every testing period in one single dataframe
+	\end{algorithmic}
+\end{algorithm}
