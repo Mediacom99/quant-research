@@ -41,7 +41,7 @@ Valid OFFSET/STOP_OFFSET values:
 
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = ofs.BDay(1),
+          OFFSET = ofs.BYearEnd(1),
           divide_years = 16, #Max is 16
           print_pca_factor_loadings = False,
           do_cross_validation = False,

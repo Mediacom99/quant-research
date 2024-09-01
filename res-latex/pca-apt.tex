@@ -111,10 +111,18 @@ Table \ref{tab:pca-explained-variance} shows the percentage of the total varianc
 The principal components of the factors are the independent variables in the linear multi-factor model in eq.\eqref{linear-multifactor-model}. The next step is to decide which linear regression model and which kind of loss function to use.
 First I decided to use a simple Ordinary Least Squares model (scikit-learn LinearRegression() model) in order to see the distribution of the residuals. I kept the last year of data out of the training sample for testing purposes.
 
-In Figure AGGIUNGERE FIGURA each stock index residual distribution's histogram is shown. We can see clearly the same problem we encountered in Figure \ref{fig:stock-returns-normal}, a clear grouping around the center. We can confidently conclude that these residuals do not follow a Gaussian distribution.
+In Figure \ref{fig:linreg-residuals} each stock index residual distribution's histogram is shown. We can immediately see the same problem we encountered in Figure \ref{fig:stock-returns-normal}, a clear grouping around the center of the distribution. We can confidently conclude that these residuals do not strictly follow a Gaussian distribution.
 
-For this reason I decided to perform Cross Validation on different kinds of more robust linear regression models and loss functions. This cross validation has been performed on the whole dataset apart from the last year that was kept for later testing. The splitting strategy used respects the time nature of the data because successive training sets are supersets of those that come before them.
-The library uses the appropriate scoring method for each model and it normalizes different scores' results such that the highest number always represents the better score. [CITE THIS COMMENT]
+\begin{figure}[htb]
+	\centering
+	\includesvg[width=\textwidth]{Images/linear-regression-residuals-hist.svg}
+	\caption{Gaussian fit for the residuals of each stock using Ordinary Least Squares}
+	\label{fig:linreg-residuals}
+\end{figure}
+
+For this reason I decided to perform K-Fold Cross Validation on different kinds of more robust linear regression models and loss functions. This cross validation has been performed on the whole dataset apart from the last year that was kept for later testing. The splitting strategy used respects the time nature of the data because successive training sets are supersets of those that came before them.
+The library uses the appropriate scoring method for each model and it normalizes different scores' results such that the highest number always represents the best score. [CITE THIS COMMENT]
+
 %https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html#sklearn.model_selection.TimeSeriesSplit]
 Here is the list of linear regression models from the python library \textit{scikit-learn} that I used to perform this cross validation:
 \begin{itemize}
@@ -125,13 +133,40 @@ Here is the list of linear regression models from the python library \textit{sci
 	\item TweedieRegressor()
 	\item SGDRegressor(loss='huber', shuffle=False)
 	\item SGDRegressor(loss='epsilon\_insensitive', shuffle=False)
-	\item SGDRegressor(loss='squared\_epsilon\_insensitive', shuffle=False, penalty='elasticnet', epsilon = 0.0001 * Y.std().mean())
+	\item SGDRegressor(loss='squared\_epsilon\_insensitive', shuffle=False, penalty='elasticnet', epsilon = 0.001 * Y.std().mean())
 \end{itemize}
-Note: () means the linear regression model was called with the library default parameters.
-In Table INSERT THE FUCKING TABLE the results are shown. It's clear that the Stochastic Gradient Descent Regressor with a squared epsilon insensitive loss function, L1 and L2 penalties (elasticnet) and epsilon is chosen as $\frac{1}{1000}$ of the mean of the volatility of each stock index return used in the regression.
+Note: "()" means the regression model was called with the library default parameters.
+
+
+In Table \ref{tab:crossval-results} the cross validation results are shown. It's clear that the Stochastic Gradient Descent Regressor with a squared epsilon insensitive loss function, L1 and L2 penalties (Elastic Net penalty) and epsilon chosen as 1\% of the mean of the volatility of each stock index return is the best performing regressor.
+
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+\begin{table}[]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		\textbf{Regressors}                     & \textbf{Mean Score} \\ \hline
+		LinearRegression (OSL)                  & -18.29              \\ \hline
+		Passive Aggressive Regressor            & -14.75              \\ \hline
+		OSL + ElasticNet                        & -18.28              \\ \hline
+		Huber Regressor                         & -19.40              \\ \hline
+		Tweedie Regressor                       & -18.28              \\ \hline
+		SGD + Huber                             & -12.26              \\ \hline
+		SGD + Epsilon Insensitive               & -13.70              \\ \hline
+		SGD + Squred Epsilon Ins. + Elastic Net & -5.06               \\ \hline
+	\end{tabular}
+	\caption{K-Fold timeseries cross validation results.}
+	\label{tab:crossval-results}
+\end{table}
 
 EXPLAIN THE REASON behind this loss function and how the elastic net penalty works.
+The Stochastic Gradiend Descent is a minimization algorithm that calculates with random sampling the gradient of the following function:
+\begin{equation}
+	Equazione di cui fai il gradiente
+\end{equation}
+Squared epsilon insensitive = cutoff at epsilon, then its quadratic
 
 Using this method on the training data we can calculate the matrix of factor exposures B in \eqref{linear-multifactor-model} and use eq.\eqref{cov-matrix-returns} to calculate the covariance matrix of expected returns. With this matrix we can implement an optimization algorithm to find the best asset allocation for our portfolio.
-All subsequent results have been calculated using the model with the highest score (the last one in the list).res-latex
+All subsequent results have been calculated using the model with the highest score (the last one in the list)
 

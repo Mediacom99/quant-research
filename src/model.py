@@ -121,7 +121,7 @@ def crossValidationRegressors(Y: pd.DataFrame, X: pd.DataFrame):
 
     for model in models:
         multi_model = MultiOutputRegressor(model)
-        res = cross_val_score(multi_model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits=5), error_score='raise', scoring='r2')
+        res = cross_val_score(multi_model, X = X,  y = Y,  cv = TimeSeriesSplit(n_splits=5), error_score='raise')
         print(f"score mean for {model} is {res.mean()}")
 
 
@@ -167,7 +167,7 @@ def regressionModelRun(Y, X, model = LinearRegression(), x_for_predict = pd.Data
 
     # #Residuals fit against standardized gaussian
     # print("residuals histograms graph:")
-    # utils.fivefigureplot(residuals)
+    # utils.fiveFigurePlot(residuals)
 
     
     if (x_for_predict.empty):
@@ -237,13 +237,14 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
         crossValidationRegressors(X,Y)
 
     # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
-    epsilon = 0.0001 * (Y.std().mean()) #Ignore differences smaller than 1/1000 of the average between the stds of the five stock indices.
+    
+    epsilon = 0.01 * (Y.std().mean()) #Ignore differences smaller than 1% of the average between the stds of the five stock indices.
     logger.info("Epsilon (loss function threshold): %s", epsilon)
 
     regression_model = SGDRegressor(
         loss='squared_epsilon_insensitive',
         penalty = 'elasticnet',
-        shuffle=False,
+        shuffle= False,
         epsilon = epsilon
     )
 
@@ -294,7 +295,6 @@ def tradingModelRun(
 
     #Load data from provided path
     data = utils.getDataFromExcel(formattedDataPath)
-
     returns = data['Stock returns']
 
     start_date  = returns.index.min()
