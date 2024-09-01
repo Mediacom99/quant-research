@@ -169,7 +169,7 @@ def regressionModelRun(Y, X, model = LinearRegression(), x_for_predict = pd.Data
     # print("residuals histograms graph:")
     # utils.fiveFigurePlot(residuals)
 
-    
+
     if (x_for_predict.empty):
         logger.info("no predict_data provided. Forecasted data will be returned empty.")
         return (residuals, coef_df, intercepts)
@@ -237,7 +237,7 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
         crossValidationRegressors(X,Y)
 
     # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
-    
+
     epsilon = 0.01 * (Y.std().mean()) #Ignore differences smaller than 1% of the average between the stds of the five stock indices.
     logger.info("Epsilon (loss function threshold): %s", epsilon)
 
@@ -245,7 +245,7 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
         loss='squared_epsilon_insensitive',
         penalty = 'elasticnet',
         shuffle= False,
-        epsilon = epsilon
+        epsilon = epsilon,
     )
 
     residuals, exposures, intercepts = regressionModelRun(Y, X, model = regression_model)
@@ -307,7 +307,7 @@ def tradingModelRun(
     portfolio_matrix = pd.DataFrame(columns = returns.columns)
     portfolio_variance = pd.Series(name='Portfolio Variance')
 
-    
+
     print("Starting rolling window loop, printing portfolio weights for each period:")
     while (temp_date < final_date and temp_date < (final_date - STOP_OFFSET)):
         #Filter data given rolling window timeframe
@@ -319,7 +319,7 @@ def tradingModelRun(
             start_date = start_date,
             end_date = temp_date
         )
-            
+
         #Calculate covariance matrix of expected returns
         cov_matrix_expected_returns = getCovMatrixFutureReturns(
             training_data=training_data,

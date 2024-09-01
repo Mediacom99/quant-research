@@ -63,7 +63,8 @@ def optimizePortfolioRun(cov_expected_returns: pd.DataFrame, returns_testing: pd
     op_w = optimizationRun(cov_expected_returns)
     logger.info("Optimized weights:")
     logger.info(op_w)
-    print(f"{returns_testing.index.min().date()} --> {returns_testing.index.max().date()} {op_w}")
+    print(f"{returns_testing.index.min().date()} --> {returns_testing.index.max().date()}", end="\t")
+    print(*[f"{w:.2%}" for w in op_w], sep=" | ")
 
     returns_testing_simple = np.exp(returns_testing) - 1
 
