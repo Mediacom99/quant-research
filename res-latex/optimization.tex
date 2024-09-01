@@ -1,18 +1,18 @@
-Since Markov first economic theories there have been developed many ways to optimize the allocation of different assets in a portfolio. Should one consider the historical average of the returns ? Should one try to find the portfolio with the highest return ? Or the standard deviation ? Or maybe one should allocate assets in a portfolio in order to reach the minimum possible variance. For this task I decided to allocate the risk instead of allocating the capital. I used a risk-parity approach that can be summed up like this: the portfolio is optimized such that each asset's contribution to the total portfolio volatility is equal. I followed the procedure in the third section of INSEISCI REF PAPER RISK PARITY DIOCANEEE.
+Since Markov first economic theories there have been developed many ways to optimize the allocation of different assets in a portfolio. Should one consider the historical average of the returns ? Should one try to find the portfolio with the highest return ? Or the standard deviation ? Or maybe one should allocate assets in a portfolio in order to reach the minimum possible variance. For this task I decided to allocate the risk instead of allocating the capital. I used a risk-parity approach that can be summed up like this: the portfolio is optimized such that each asset's contribution to the total portfolio volatility is equal. I followed the procedure in the third section of \cite{risk-parity-hard}.
 
 Before writing the objective function of the optimization problem, two quantities need to be introduced: the marginal risk contribution (MRC) and the risk contribution (RC). The MRC is calculated as follows:
 \begin{equation}
 	\vec{\textit{MRC}} = \mathbf{\Sigma}\vec{w}
 \end{equation}
-where $\Sigma$ is the covariance matrix of expected returns. The components of MRC represent the contribution of each asset based on its volatility and the weights of the portfolio.
+where $\Sigma$ is the covariance matrix of expected returns. The components of MRC represent the contribution of each asset to the portfolio volatility based on the asset's weight and its volatility.
 The Risk Contribution is obtained as follows:
 \begin{equation}
-	\vec{\textit{RC}} = \frac{(w * \vec{\textit{MRC}})}{\Vec{w}^{T}\mathbf{\Sigma}\Vec{w}}
+	\vec{\textit{RC}} = \frac{\vec{w} * (\vec{\textit{MRC}})^T}{\Vec{w}^{T}\mathbf{\Sigma}\Vec{w}}
 \end{equation}
 where $*$ represents element-wise multiplication and the denominator is the portfolio volatility.
 Now the objective function can be constructed easily, we impose that each element of the Risk Contribution vector is equal, thus:
 \begin{equation}
-	f(\vec{x}) = \sum_{i = 1, j = i + 1}^{N} (\vec{\textit{RC}}_i (\vec{x}) - \vec{\textit{RC}}_j (\vec{x}))^2 
+	f(\vec{x}) = \sum_{\substack{i = 1 \\ j = i + 1}}^{N} (\vec{\textit{RC}}_i (\vec{x}) - \vec{\textit{RC}}_j (\vec{x}))^2 
 	\label{risk-parity-objfunc}
 \end{equation}
 So the minimization problem, adding the constraints for a long-only trading model and complete asset allocation is:

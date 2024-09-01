@@ -1,33 +1,23 @@
-
-Explain from formattedData to portfolio results. With rolling window. 
-
-\begin{enumerate}
-\item divide returns and factors datasets into training and testing
-\item Normalize factors
-\item Apply PCA on factors
-\item Lag factors by shifting them one day into the future
-\item run SGD regressor
-\item calculate cov matrix with formula with eq. \eqref{cov-matrix-returns}
-\item Find optimized portfolio weights using cov matrix 
-\item calculate portfolio performance with this optimized weights on the testing data.
-\end{enumerate}
-In order to better represent an actual real-world implementation of this model I decided to use a Rolling Window approach. I start with a certain division between training and testing data, I run the aformentioned algorithm, then I add the testing data used in this run to the training data that will be used in the next run. Then I repeat. 
-
+In order to better represent an actual real-world implementation of this model I decided to use a Rolling Window approach. I start with a certain division between training and testing data with the following algorithm:
 \begin{algorithm}
 	\caption{Rolling Window Model Deployment}
 	\begin{algorithmic}[1]
 		\STATE TEMPDATE = initial training/testing division date
 		\WHILE{TEMPDATE < FINALDATE}
-		\STATE Divide returns and factors into training and testing initial datasets
-		\STATE Normalize the factors
-		\STATE Apply two PCA runs on factors
-		\STATE Lag factors
-		\STATE Run SGD regressor
-		\STATE calculate calculate cov matrix with formula with eq. \eqref{cov-matrix-returns}
-		\STATE Find optimized portfolio weights using cov matrix
-		\STATE Calculate portfolio performance over period
-		\STATE TEMPDATE + chosen OFFSET (day, week, month, year)
+		\STATE Update training and testing datasets with new dates from TEMPDATE
+		\STATE Normalize the factors to unit variance and zero mean
+		\STATE Apply PCA on factors as described in Section \ref{pca}
+		\STATE Lag factors so that the factors of the day before are used with the next day stock returns
+		\STATE Run SGD regressor as described in Section \ref{crossval} and get factor exposures
+		\STATE Calculate covariance matrix of expected returns with eq. \eqref{cov-matrix-returns}
+		\STATE Find optimized portfolio weights as described in Section \ref{optimization}
+		\STATE Apply optimized weights to returns testing data
+		\STATE Store portfolio daily returns and volatility
+		\STATE go to next period: TEMPDATE + chosen OFFSET (day, week, month, year)
 		\ENDWHILE
-		\RETURN daily portfolio returns over every testing period in one single dataframe
+		\RETURN Daily portfolio returns and volatility
 	\end{algorithmic}
 \end{algorithm}
+
+
+For example given an offset of one month and the initial training comprised of the first $(N - 1)$ years of historical data, the algorithm would run the model using the first month of the last year as testing data during the first run. In the second run the previous month is added to the training data and the next month is selected for testing. This repeats until we reach the end of the historical data.

@@ -69,6 +69,7 @@ There exists more complex models which incorporate both time-volatility and non-
 The idea is to use a linear regression model to calculate both $\mathbf{B}$ and $\mathbf{S}$. Then it is possible to obtain the covariance matrix of expected returns and use it to optimize the portfolio as shown in Section \ref{optimization}.
 
 \subsection{Principal Component Analysis on Factors}
+\label{pca}
 % calcoli pca e butto assieme al multifactor model. Also YUou could use LASSO with Ridge regression (Elastic Net) before PCA.
 As we have seen in Figure \ref{fig:correlation-heatmap} the highest correlation is between Macro returns and Fundamentals. For this reason, and also to simplify the interpretation of the remaining principal components, I decided to use standard PCA between Macro returns and Fundamentals. With these principal components selected I will run standard PCA again against all the other remaining factors and the 'Macro-Fundamental' principal components I found before.
 The standard Principal Components Analysis basically diagonalizes the covariance matrix and finds its eigenvectors. Using these eigenvectors as the transformation matrix it is possible to write every element of the initial base into the new base where the covariance matrix is diagonal (here the absence of covariance). One can then choose how many principal components to keep, thus how many of the eigenvectors with the biggest eigenvalues to keep. These principal components are directions in the new base that explain the most variance of the analyzed data. For this task I decided to choose the first five principal components, after some trial and error I found it was the most optimal choice, as it's shown in the following table and graphs. In reality once should carefully decide how to choose principal components, maybe even forcing a certain total explained variance, leaving the number of components chosen as variable.
@@ -108,6 +109,7 @@ Table \ref{tab:pca-explained-variance} shows the percentage of the total varianc
 \end{figure}
 
 \subsection{K-Fold Cross Validation of Linear Regressors}
+\label{crossval}
 The principal components of the factors are the independent variables in the linear multi-factor model in eq.\eqref{linear-multifactor-model}. The next step is to decide which linear regression model and which kind of loss function to use.
 First I decided to use a simple Ordinary Least Squares model (scikit-learn LinearRegression() model) in order to see the distribution of the residuals. I kept the last year of data out of the training sample for testing purposes.
 
@@ -180,6 +182,6 @@ The Elastic Net regularization function is:
 \end{equation}
 with $\rho$ set at default library value ($0.15$). The L2 norm term makes the loss function strongly convex, and therefore it has a unique minimum. It also handles highly correlated variables better than OSL. The L1 norm (second term) handles possible sparsity of coefficients.
 
-Using this method on the training data we can calculate the matrix of factor exposures $B$ in eq. \eqref{linear-multifactor-model} and use eq.\eqref{cov-matrix-returns} to calculate the covariance matrix of expected returns. With this matrix we can implement an optimization algorithm to find the best asset allocation for our portfolio.
+Using this method on the training data we can calculate the matrix of factor exposures $\mathbf{B}$ and the matrix $\mathbf{S}$ in eq. \eqref{linear-multifactor-model} and use eq.\eqref{cov-matrix-returns} to calculate the covariance matrix of expected returns. With this matrix we can implement an optimization algorithm to find the best asset allocation for our portfolio.
 All subsequent results have been calculated using the model with the highest score (the last one in the list).
 

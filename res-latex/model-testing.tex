@@ -1,10 +1,11 @@
 \begin{itemize}
 	\item portfolio return, volatility, sharpe e sortino 
-	\item 1 year of training, rolling window, Day, Week, Month, Year
+	\item 1 year of training, rolling window, Week, Month, Year
 	\item Print portfolio matrix for each one.
 	\item Print graph for each one.
+	\item print graph of weights over time
 	\item Show problem with 4 years and BDay, (next item)
-	\item Check difference in portfolio returns by starting daily rolling window with 1 or 4/5 years of training especially consider the period around 2008-2010. This shows how the model benefits from not having training data that is too different from a period of extreme market volatility. With 1 year of training and a daily re-balancing frequency the model is much more free to adapt to extreme market conditions. (This period is in fact the period of greater volatility, see Figure \ref{fig:stock-std-plot})
+	\item Check difference in portfolio returns by starting weekly rolling window with 1 or 4/5 years of training especially consider the period around 2008-2010. This shows how the model benefits from not having training data that is too different from a period of extreme market volatility. With 1 year of training and a daily re-balancing frequency the model is much more free to adapt to extreme market conditions. (This period is in fact the period of greater volatility, see Figure \ref{fig:stock-std-plot})
 	(Look at the bearish dip around 2008-2010). This means that this model needs two memories: a long and a short memory, the long one should be correctly weighted. In this model this is happening manually when I decide with how much training data to start the rolling window approach.
 	
 	Lot of first years of training --> old memory weighs more
