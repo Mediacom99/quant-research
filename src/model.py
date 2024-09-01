@@ -1,3 +1,4 @@
+
 """
 This module deals with training the model, calculating the covariance matrix
 of expected returns and optimizing the portfolio based on this matrix. The model uses PCA on different factors and a linear multifactor model to explain the relation between factors and stock indices returns.
@@ -367,8 +368,8 @@ def tradingModelRun(
     print(f"Total portfolio return over testing period: {(portfolio_cum_return_tot*100):.2f}%")
     print(f"Total portfolio volatility over testing period: {(portfolio_volatility*100):.2f}%")
     print(f"Sharpe Ratio over testing period: {portfolio_cum_return_tot / portfolio_volatility:.2f}")
-    print(f"Max single cumulative stock return over whole testing period:{((np.exp(returns.loc[divide_date:final_date].sum()) - 1).max()*100):.2f}%")
-    print(f"Min single cumulative stock return over whole testing period:{((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
+    print(f"Max single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).max()*100):.2f}%")
+    print(f"Min single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
     print(f"Singular stock index lowest volatility: {single_min_vol:.2%}")
     print(f"Singular stock index highest volatility: {single_max_vol:.2%}")
     

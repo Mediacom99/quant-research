@@ -85,7 +85,7 @@ def plotCumReturns(df):
     plt.show()
 
 
-def  edaRun(formattedDataPath: str, skipAndersonDarling: bool):
+def  edaRun(formattedDataPath: str, doAndersonDarling: bool):
 
     data = utils.getDataFromExcel(formattedDataPath)
     returns_norm = utils.normalizeDataFrame(data['Stock returns'])
@@ -98,7 +98,7 @@ def  edaRun(formattedDataPath: str, skipAndersonDarling: bool):
         print("\tSkewness", series.skew())
         print("\tExcess kurtosis: ", series.kurtosis())
 
-        if(skipAndersonDarling == False):
+        if(doAndersonDarling):
             print("\tAnderson-Darling:")
             result_ad = normalFitTest(series, 'ad')
             print("\t\tP-value: ", result_ad.pvalue)

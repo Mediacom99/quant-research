@@ -25,10 +25,10 @@ rawDataPath = '../raw-data/data.xlsx'
 formattedDatPath = '../formatted-data/formatted-data.xlsx'
 
 # CLEAN DATA (this module cleans raw data)
-# clean_data.cleanDataRun(rawDataPath, formattedDatPath)
+clean_data.cleanDataRun(rawDataPath, formattedDatPath)
 
 # EXPLORATORY DATA ANLYSIS
-# eda.edaRun(formattedDatPath, skipAndersonDarling=True)
+eda.edaRun(formattedDatPath, doAndersonDarling=True)
 
 # RUN THE TRADING MODEL
 """
@@ -36,17 +36,17 @@ Valid OFFSET/STOP_OFFSET values:
 - X business years: ofs.BYearEnd(X)
 - X business months: ofs.BMonthEnd(X)
 - X business weeks: ofs.BDay(5 * X)
-- X business days: ofs.BDay(X) (It has some problems with portfolio volatility in certain timeframes)
+- X business days: ofs.BDay(X)
 """
 
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = ofs.BDay(1),
-          divide_years = 1, #Max is 16
+          OFFSET = ofs.BYearEnd(5),
+          divide_years = 10, #Max is 16
           print_pca_factor_loadings = False,
           do_cross_validation = False,
-          portfolio_matrix_filename = '../portfolio-matrices/portfolio-matrix-1-BDay.xlsx',
-          STOP_OFFSET = ofs.BYearEnd(0)
+          portfolio_matrix_filename = '../portfolio-matrices/portfolio-matrix-temp.xlsx',
+          STOP_OFFSET = ofs.BYearEnd(0),
           )
 
 logging.shutdown()
