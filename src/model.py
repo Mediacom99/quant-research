@@ -1,4 +1,3 @@
-
 """
 This module deals with training the model, calculating the covariance matrix
 of expected returns and optimizing the portfolio based on this matrix. The model uses PCA on different factors and a linear multifactor model to explain the relation between factors and stock indices returns.
@@ -238,9 +237,8 @@ def getCovMatrixFutureReturns(training_data: {pd.DataFrame}, print_pca_factor_lo
         print("Cross validation mean scores (higher is always better):")
         crossValidationRegressors(X,Y)
 
-    # exposures are the result parameters of the fit (if residuals is smaller then epsilon then ignore it) if diff in daily is 0.001% then epsilon = is 1.001
-
-    epsilon = 0.01 * (Y.std().mean()) #Ignore differences smaller than 1% of the average between the stds of the five stock indices.
+    #Ignore differences smaller than 1% of the average between the stds of the five stock indices
+    epsilon = 0.01 * (Y.std().mean()) 
     logger.info("Epsilon (loss function threshold): %s", epsilon)
 
     regression_model = SGDRegressor(
@@ -372,17 +370,17 @@ def tradingModelRun(
     print(f"Min single cumulative stock return over whole testing period: {((np.exp(returns.loc[divide_date:final_date].sum()) - 1).min()*100):.2f}%")
     print(f"Singular stock index lowest volatility: {single_min_vol:.2%}")
     print(f"Singular stock index highest volatility: {single_max_vol:.2%}")
-    
-    #TODO print max and min variance
 
-    #Here the two inputs might be in different timeframes (daily, monthly)
-    # it depends on the chosen rebalancing frequency
+    #Print portfolio VS stock indices cum returns
     utils.graphPortfolioStocksPerformance(
         portfolio_cum_returns,
         returns_testing_cum_simple
     )
 
+    #Save portfolio matrix
     portfolio_matrix.to_excel(portfolio_matrix_filename)
+
+    #Print portfolio weights over time.
     utils.graphPortfolioWeights(portfolio_matrix)
     print("Finished Trading Model with Rolling Window, check log file for more information")
     return

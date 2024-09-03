@@ -40,14 +40,14 @@ Indice Azionario Paese 5 & -7.539359374959799e-18 & 1.0001179175760244          
 \label{fig:stock-returns-normal}
 \end{figure}
 
-As we can see both from the plot in Figure \ref{fig:stock-returns-normal} and Table \ref{tab:stock-fit-gaussian} the problem is clear: the first two moments are extremely close to being those of a standardized gaussian, in fact the shape of the histogram is not extremely different from that of gaussian distributed data. The skewness is relatively small, in fact we cannot see any extreme rupture of symmetry to the right or left. The problem is exactly the excess kurtosis which is way too big, because of the huge amount of data clustering at the center, which would make the gaussian distribution way too peaked. This also explains the low pvalue of the Anderson-Darling test which by taking into account the skewdness of the data has to conclude that the data is not normal. There have been proposed ways of modeling the stock returns as more complex distributions, like elliptical distributions as shown in \cite{risk-parity-hard}.
+As we can see both from the plot in Figure \ref{fig:stock-returns-normal} and Table \ref{tab:stock-fit-gaussian} the problem is clear: the first two moments are extremely close to being those of a standardized gaussian, in fact the shape of the histogram is not extremely different from that of gaussian distributed data. The skewness is relatively small, in fact we cannot see any extreme rupture of symmetry to the right or left. The problem is the excess kurtosis which is way too big because of the huge amount of data clustering at the center, which would make the gaussian distribution way too peaked. This also explains the low pvalue of the Anderson-Darling test which by taking into account the skewdness of the data has to conclude that the data is not normal. There have been proposed ways of modeling the stock returns as more complex distributions like elliptical distributions, as shown in \cite{risk-parity-hard}.
 
 
 
 \subsection{Time Dependence}
 Stationarity is a very important characteristic of financial data. It has to be taken into consideration especially when using Multi-Factor models that do not inherently consider the time relations between data. Also the assumption of stock returns following a normal distribution requires a non time-varying mean and standard deviation. For this reason in Figure \ref{fig:stock-std-plot} are shown the time plots of the weekly standard deviation of the stock returns.
 
-As we can see the variance is mostly oscillating between $0$ and $1$, apart from huge spikes of volatility in the stock returns that coincide with periods of extreme economic uncertainty (like the 2008-2010 "Great Recession"). This needs to be taken into account when interpreting the portfolio results, especially to understand how much the model can adapt to sudden changes in the market.
+As we can see the variance is mostly oscillating between $0$ and $1$, apart from huge spikes of volatility in the stock returns that coincide with periods of extreme economic uncertainty (like the 2008-2010). This needs to be taken into account when interpreting the portfolio results, especially to understand how much the model can adapt to sudden changes in the market.
 
 \begin{figure}[htb]
 \centering

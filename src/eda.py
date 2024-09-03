@@ -1,5 +1,4 @@
-# Exploratory Data Analysis of cleaned data
-
+"""Exploratory Data Analysis of cleaned data"""
 import pandas as pd
 from scipy import stats as st
 import numpy as np

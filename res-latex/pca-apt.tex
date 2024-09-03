@@ -20,12 +20,12 @@
 % REMEMBER: if osl does not work maybe I can use data in a smaller time frame, like last 2-3 years or 1 year and use rolling window.
 
 
-This section describes the process of implementing and training a multi-factor model in conjunction with Principal Component Analysis on the factors for forecasting expected returns and volatility to later use for the portfolio optimization.
+This section describes the process of implementing and training a multi-factor model in conjunction with Principal Component Analysis on the factors for forecasting expected returns and volatility to later use for the portfolio optimization. The model has been implemented in the custom python module \textbf{module.py}.
 
 First it's important to establish the goal of this model: finding a relationship between stock returns and all the other historical daily data in the dataset, which we will call factors (rates, currency crossings, commodities, macro indices, fundamentals of stock), such that it's possible to use this relationship to forecast future expected stock returns knowing the values of the factor at the current time.
 Three main questions immediately come to mind: \textbf{what distribution should one use to model stock returns as random variables ? What kind of mathematical relationship is there between the factors and the stock returns ? How should one choose which factors to use ?} 
 
-The first question requires an assumption, usually it is required that either the actual returns or the log returns follow a normal distribution. As shown in the previous section, the stock log returns are 'decently' close to being described by a normal distribution if not for the presence of clustering near the center and not normal tails. For this task we will proceed as if the stock returns (as logarithmic daily data) follow a univariate gaussian distribution so that the vector of stocks follows a multivariate normal distribution:
+The first question requires an assumption, usually it is required that either the actual returns or the log returns follow a normal distribution. As shown in the previous section, the stock indices' log returns are 'decently' close to being described by a normal distribution if not for the presence of clustering near the center and not normal tails. For this task we will proceed as if the stock returns (as logarithmic daily data) follow a univariate gaussian distribution so that the vector of stocks follows a multivariate normal distribution:
 \begin{equation}
     \Vec{r} = N(\Vec{\mu}, \Vec{\sigma})
 \end{equation}
@@ -34,10 +34,11 @@ where: $\Vec{r} = (r_1, r_2, r_3, r_4, r_5)$ is the stock returns vector, $\Vec{
 The  portfolio return will follow this normal  distribution:
 \begin{equation}
         r_p = N(\Vec{w}\cdot\Vec{\mu}, \Vec{w}^{T}\mathbf{\Sigma}\Vec{w})
+        \label{portfolio-distribution}
 \end{equation}
 where: $\Vec{w}$ is the vector of weights which will define the portfolio allocation. The weights are the result of the optimization process. $\Sigma = (\sigma_{i,j})$ ($i,j = 1,...,5)$ is the covariance matrix of expected returns.
 Normality is not really required for the multi-factor model but it is required when optimizing the portfolio using a risk-parity approach where all the information present in the objective function solely comes from the covariance matrix of the forecasted stock returns. This needs to be taken into account when interpreting both the model and the portfolio optimization results.
-I COULD CITE THE TEXTBOOK I USED!
+For more information see \cite{eq-port-manag-book}.
 
 
 Now for the second question we need another assumption: the relationship between the stock returns and the chosen factors is \textbf{linear}, so:
@@ -45,9 +46,10 @@ Now for the second question we need another assumption: the relationship between
     r_i = a_i + B_{1,i}F_{1,i} + ... + \epsilon_i
     \label{multifactor}
 \end{equation}
-where $\epsilon$ is the random error from the regression model used to determine the parameters in the above equation. The only thing an ordinary least squares linear regression model requires is the normality of $\epsilon$. For this reason we will show the performance of different linear regressor that are more robust and do not need the residuals to be normally distributed .Also it would help to have factor returns that are not correlated between each other, in order to lower the probability of overfitting.
+where $\epsilon$ is the random error from the regression model used to determine the parameters in the above equation. The only thing an ordinary least squares linear regression model requires is the normality of $\epsilon$. For this reason we will show the performance of different linear regressor that are more robust and do not need the residuals to be normally distributed.
 
-Finally to tackle the problem of choosing the factors and at the same time dealing with correlation between factors I decided to use Principal Component Analysis on the factors in order to reduce their dimensionality by choosing only the first $K$ principal components such that a certain percentage of the total variance of the factors is explained, usually around $80-90\%$ is used.
+
+Finally to tackle the problem of choosing the factors and at the same time dealing with correlation between factors I decided to use Principal Component Analysis on the factors in order to reduce their dimensionality by choosing only the first $5$ principal components which explain around 75-85\% of the total variance.
 
 Equation \eqref{multifactor} can be written in vector-matrix notation:
 \begin{equation}
@@ -76,7 +78,7 @@ The standard Principal Components Analysis basically diagonalizes the covariance
 
 The following results have been calculated using the whole dataset apart from the last year which was kept for testing purposes.
 In Figure \ref{fig:factor-contribution-pca1} we can see the contribution of each Macroeconomic factor and Fundamentals factor to the first five principal components chosen. There are some peaks, suggesting that there are certain factors that prevail on the others but overall the distribution is pretty equal.
-In Figure \ref{fig:factor-contribution-pca2} the situation is quite different: we can see that the first three final principal components are basically the same as the first three Macro and Fundamentals principal components; the last two final principal components are a combination of rates, commodities and forex.
+In Figure \ref{fig:factor-contribution-pca2} the principal component of the final PCA run are shown. Here the situation is quite different: we can see that the first three final principal components are basically the same as the first three Macro and Fundamentals principal components; the last two final principal components are a combination of rates, commodities and forex.
 These final five principal components will be used in the next section as the input data to train the linear model.
 Table \ref{tab:pca-explained-variance} shows the percentage of the total variance of the factors explained by each principal component chosen, as well as the total explained variance of the first and second PCA run.
 
@@ -104,7 +106,7 @@ Table \ref{tab:pca-explained-variance} shows the percentage of the total varianc
 \begin{figure}[htb]
 	\centering
 	\includesvg[width=\textwidth]{Images/factor-contribution-to-pca2.svg}
-	\caption{}
+	\caption{Composition of final principal components}
 	\label{fig:factor-contribution-pca2}
 \end{figure}
 
@@ -112,6 +114,8 @@ Table \ref{tab:pca-explained-variance} shows the percentage of the total varianc
 \label{crossval}
 The principal components of the factors are the independent variables in the linear multi-factor model in eq.\eqref{linear-multifactor-model}. The next step is to decide which linear regression model and which kind of loss function to use.
 First I decided to use a simple Ordinary Least Squares model (scikit-learn LinearRegression() model) in order to see the distribution of the residuals. I kept the last year of data out of the training sample for testing purposes.
+
+The linear model has been implemented in the custom python module \textbf{model.py}.
 
 In Figure \ref{fig:linreg-residuals} each stock index residual distribution's histogram is shown. We can immediately see the same problem we encountered in Figure \ref{fig:stock-returns-normal}, a clear grouping around the center of the distribution. We can confidently conclude that these residuals do not strictly follow a Gaussian distribution.
 
@@ -123,9 +127,9 @@ In Figure \ref{fig:linreg-residuals} each stock index residual distribution's hi
 \end{figure}
 
 For this reason I decided to perform K-Fold Cross Validation on different kinds of more robust linear regression models and loss functions. This cross validation has been performed on the whole dataset apart from the last year that was kept for later testing. The splitting strategy used respects the time nature of the data because successive training sets are supersets of those that came before them.
-The library uses the appropriate scoring method for each model and it normalizes different scores' results such that the highest number always represents the best score. [CITE THIS COMMENT]
+The library uses the appropriate scoring method for each model and it normalizes different scores' results such that the highest number always represents the best score. For more information see \cite{cross-val-info}.
 
-%https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html#sklearn.model_selection.TimeSeriesSplit]
+
 Here is the list of linear regression models from the python library \textit{scikit-learn} that I used to perform this cross validation:
 \begin{itemize}
 	\item LinearRegression()
@@ -135,7 +139,7 @@ Here is the list of linear regression models from the python library \textit{sci
 	\item TweedieRegressor()
 	\item SGDRegressor(loss='huber', shuffle=False)
 	\item SGDRegressor(loss='epsilon\_insensitive', shuffle=False)
-	\item SGDRegressor(loss='squared\_epsilon\_insensitive', shuffle=False, penalty='elasticnet', epsilon = 0.001 * Y.std().mean())
+	\item SGDRegressor(loss='squared\_epsilon\_insensitive', shuffle=False, penalty='elasticnet', epsilon = 0.01 * Y.std().mean())
 \end{itemize}
 Note: "()" means the regression model was called with the library default parameters.
 
@@ -149,9 +153,9 @@ In Table \ref{tab:crossval-results} the cross validation results are shown. It's
 	\begin{tabular}{|c|c|}
 		\hline
 		\textbf{Regressors}                     & \textbf{Mean Score} \\ \hline
-		LinearRegression (OSL)                  & -18.29              \\ \hline
+		LinearRegression (OLS)                  & -18.29              \\ \hline
 		Passive Aggressive Regressor            & -14.75              \\ \hline
-		OSL + ElasticNet                        & -18.28              \\ \hline
+		OLS + ElasticNet                        & -18.28              \\ \hline
 		Huber Regressor                         & -19.40              \\ \hline
 		Tweedie Regressor                       & -18.28              \\ \hline
 		SGD + Huber                             & -12.26              \\ \hline
@@ -162,8 +166,8 @@ In Table \ref{tab:crossval-results} the cross validation results are shown. It's
 	\label{tab:crossval-results}
 \end{table}
 
-Let's consider a set of training data $(\vec{x_1}, y_1),\dots,(\vec{x_n}, y_n)$ where $\vec{x_i} \in \mathcal{R}^m$ (our factors) and $y_i \in \mathcal{R}$ (our stock indices returns). The goal is to learn a linear scoring function $f(x) = \vec{w}^{T}\cdot\vec{x} + b$ with model parameters $\vec{w} \in \mathcal{R}^m$ (our factor exposures) and intercept $b \in \mathcal{R}$.
-To find the model parameters, the following function is minimized using the Stochastic Gradient Descent method:
+Let's consider a set of training data $(\vec{x_1}, y_1),\dots,(\vec{x_n}, y_n)$ where $\vec{x_i} \in \mathcal{R}^m$ (our principal components) and $y_i \in \mathcal{R}$ (our stock indices returns). The goal is to learn a linear scoring function $f(x) = \vec{w}^{T}\cdot\vec{x} + b$ with model parameters $\vec{w} \in \mathcal{R}^m$ (our factor exposures) and intercept $b \in \mathcal{R}$.
+To find the model parameters, the following function is minimized using the Stochastic Gradient Descent method as explained in \cite{sgd-paper}:
 \begin{equation}
 	E(\vec{w},b) = \frac{1}{n} \sum_{i=1}^n L(y_i, f(\vec{x_i}, \vec{w})) + \alpha R(\vec{w})
 	\label{reg-train-error}

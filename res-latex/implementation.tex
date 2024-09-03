@@ -1,5 +1,5 @@
-In order to better represent an actual real-world implementation of this model I decided to use a Rolling Window approach. I start with a certain division between training and testing data with the following algorithm:
-\begin{algorithm}
+In order to better represent an actual real-world implementation of this model I decided to use a Rolling Window approach. I start with a certain division at a certain date between training and testing data with the following algorithm:
+\begin{algorithm}[H]
 	\caption{Rolling Window Model Deployment}
 	\begin{algorithmic}[1]
 		\STATE TEMPDATE = initial training/testing division date
@@ -11,13 +11,13 @@ In order to better represent an actual real-world implementation of this model I
 		\STATE Run SGD regressor as described in Section \ref{crossval} and get factor exposures
 		\STATE Calculate covariance matrix of expected returns with eq. \eqref{cov-matrix-returns}
 		\STATE Find optimized portfolio weights as described in Section \ref{optimization}
-		\STATE Apply optimized weights to returns testing data
-		\STATE Store portfolio daily returns and volatility
-		\STATE go to next period: TEMPDATE + chosen OFFSET (day, week, month, year)
+		\STATE Apply optimized weights to testing data
+		\STATE Store portfolio daily returns
+		\STATE go to next period: TEMPDATE += chosen OFFSET (day, week, month, year)
 		\ENDWHILE
 		\RETURN Daily portfolio returns over testing period from initial value of TEMPDATE to FINALDATE
 	\end{algorithmic}
 \end{algorithm}
 
 
-For example given an offset of one month and the initial training comprised of the first $(N - 1)$ years of historical data, the algorithm would run the model using the first month of the last year as testing data during the first run. In the second run the previous month is added to the training data and the next month is selected for testing. This repeats until we reach the end of the historical data.
+For example given an offset of one month and the initial training comprised of the first $(N - 1)$ years of historical data, the algorithm would run the model using the first month of the last year as testing data during the first run, using the first year as training data. In the second run the previous month is added to the training data and the next month is selected for testing. This repeats until we reach the end of the historical data.

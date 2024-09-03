@@ -1,8 +1,8 @@
 \documentclass[a4paper,11pt]{article}
-\usepackage{svg}
+\usepackage[]{svg}
 \usepackage[T1]{fontenc} %Font stuff
 %\usepackage{tgcursor} %Font stuff
-\usepackage{graphicx} %Inserting images
+\usepackage[]{graphicx} %Inserting images
 \usepackage[hidelinks]{hyperref} %References become hyperlinks to the referenced part
 %\graphicspath{ {images/} } %Path to images folder
 \usepackage{nameref} % Package for referencing sections and such
@@ -90,11 +90,18 @@
 \label{model-testing}
 \input{model-testing}
 
+\section{Conclusion}
+In conclusion, this study implemented a long-only trading model for five stock indices using a linear multi-factor approach combined with Principal Component Analysis on the factors. The risk-parity portfolio optimization strategy demonstrated robust performance across different time periods, effectively balancing risk among the assets. Especially we can see the ability of the model to adapt to the period of high market volatility in the 2008-2010 period.
+
+Future work could explore the integration of more advanced time series models, such as LSTM neural networks as in \cite{nakagawa}, to better capture long and short-term memory effects in financial markets. Additionally, investigating the relationship between weight crossings and periods of extreme market volatility could yield valuable insights for risk management strategies.
+
+Overall, this model provides a solid foundation for portfolio optimization in a multi-asset context, with potential for further refinement and application in real-world trading scenarios.
+
 
 \clearpage
 \phantomsection
+\listoffigures
+\clearpage
 \printbibliography
-
-
 
 \end{document}

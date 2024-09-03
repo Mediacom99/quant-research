@@ -1,5 +1,4 @@
 
-
 '''
 Main file, only this file should be executed from the command line
 '''
@@ -21,16 +20,17 @@ print("More info can be found in the log file: \"minerva-task.log\"")
 
 #Original raw data
 rawDataPath = '../raw-data/data.xlsx'
+
 #Cleaned and formatted data
 formattedDatPath = '../formatted-data/formatted-data.xlsx'
 
-# CLEAN DATA (this module cleans raw data)
+# Uncomment to clean data.xlsx and write formatted-data.xlsx
 clean_data.cleanDataRun(rawDataPath, formattedDatPath)
 
-# EXPLORATORY DATA ANLYSIS
-eda.edaRun(formattedDatPath, doAndersonDarling=True)
+# Uncomment to perform exploratory data analysis.
+eda.edaRun(formattedDatPath, doAndersonDarling=False) #Set to True for Anderson-Darling test
 
-# RUN THE TRADING MODEL
+
 """
 Valid OFFSET/STOP_OFFSET values:
 - X business years: ofs.BYearEnd(X)
@@ -39,14 +39,15 @@ Valid OFFSET/STOP_OFFSET values:
 - X business days: ofs.BDay(X)
 """
 
+# Comment/Uncomment to run the trading model with rolling window
 model.tradingModelRun(
           formattedDataPath = formattedDatPath,
-          OFFSET = ofs.BYearEnd(5),
-          divide_years = 10, #Max is 16
-          print_pca_factor_loadings = False,
-          do_cross_validation = False,
+          OFFSET = ofs.BDay(5),
+          divide_years = 16, #Max is 16
+          print_pca_factor_loadings = False, #Set to True for pca factor loadings
+          do_cross_validation = False, #Set True to perform cross validation on each run (use BYearEnd(1) offset)
           portfolio_matrix_filename = '../portfolio-matrices/portfolio-matrix-temp.xlsx',
-          STOP_OFFSET = ofs.BYearEnd(0),
+          STOP_OFFSET = ofs.BYearEnd(0), #To stop the testing before end of historical data
           )
 
 logging.shutdown()
