@@ -1,4 +1,3 @@
-
 '''
 Main file, only this file should be executed from the command line
 '''

@@ -1,16 +1,7 @@
-with import <nixpkgs> {};
+{ pkgs ? import <nixpkgs> {} }:
 
-let
-  unstable = import
-    (builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz")
-    # reuse the current configuration
-    { config = config; };
-in
 pkgs.mkShell {
 
-  # set derivation name
-  name = "quant-start";
-  
   # add binaries
   packages = with pkgs.python311Packages; [
     matplotlib
@@ -20,6 +11,12 @@ pkgs.mkShell {
     scipy
     scikit-learn
     seaborn
+
+    #Text Editor stuff
+    #Remove if you dont need it
+    python-lsp-server
+    pkgs.virtualenv
+    
   ];
 
   # add build dependecies from list of derivations
